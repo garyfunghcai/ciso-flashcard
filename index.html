@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CISO 备考闪卡</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --bg: #0f172a; --card: #1e293b; --border: #334155;
+  --primary: #38bdf8; --accent: #a78bfa; --correct: #22c55e;
+  --wrong: #ef4444; --text: #e2e8f0; --muted: #94a3b8; --gold: #fbbf24;
+}
+body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+.container { max-width: 680px; margin: 0 auto; padding: 20px; }
+.header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; flex-wrap: wrap; gap: 12px; }
+.header h1 { font-size: 1.4rem; color: var(--primary); }
+.score-panel { display: flex; gap: 16px; font-size: 0.85rem; }
+.score-panel span { color: var(--muted); }
+.score-panel b { color: var(--gold); }
+.progress-wrap { margin-bottom: 20px; }
+.progress-bar { height: 6px; background: var(--border); border-radius: 3px; overflow: hidden; margin-top: 6px; }
+.progress-fill { height: 100%; background: linear-gradient(90deg, var(--primary), var(--accent)); transition: width 0.4s ease; border-radius: 3px; }
+.card { background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 28px; margin-bottom: 20px; position: relative; }
+.card-id { position: absolute; top: 16px; right: 20px; font-size: 0.75rem; color: var(--muted); background: var(--bg); padding: 3px 10px; border-radius: 20px; }
+.stem { font-size: 1.05rem; line-height: 1.7; margin-bottom: 20px; }
+.option { display: flex; align-items: flex-start; gap: 12px; padding: 12px 16px; border: 1.5px solid var(--border); border-radius: 10px; margin-bottom: 10px; cursor: pointer; transition: all 0.15s; font-size: 0.95rem; line-height: 1.5; }
+.option:hover:not(.disabled) { border-color: var(--primary); background: rgba(56,189,248,0.06); }
+.option .opt-label { min-width: 24px; height: 24px; border-radius: 50%; border: 2px solid var(--border); display: flex; align-items: center; justify-content: center; font-size: 0.75rem; font-weight: 700; flex-shrink: 0; margin-top: 1px; }
+.option.correct { border-color: var(--correct); background: rgba(34,197,94,0.1); }
+.option.correct .opt-label { border-color: var(--correct); background: var(--correct); color: #fff; }
+.option.wrong { border-color: var(--wrong); background: rgba(239,68,68,0.1); }
+.option.wrong .opt-label { border-color: var(--wrong); background: var(--wrong); color: #fff; }
+.option.disabled { cursor: default; opacity: 0.85; }
+.explanation { background: rgba(167,139,250,0.1); border: 1px solid rgba(167,139,250,0.3); border-radius: 10px; padding: 14px 16px; margin-top: 16px; font-size: 0.88rem; line-height: 1.6; color: #c4b5fd; }
+.explanation strong { color: var(--accent); display: block; margin-bottom: 4px; }
+.actions { display: flex; gap: 10px; flex-wrap: wrap; }
+.btn { padding: 10px 20px; border-radius: 10px; border: none; font-size: 0.9rem; cursor: pointer; transition: all 0.15s; font-weight: 600; }
+.btn-primary { background: linear-gradient(135deg, var(--primary), var(--accent)); color: #0f172a; }
+.btn-primary:hover { opacity: 0.88; transform: translateY(-1px); }
+.btn-ghost { background: transparent; border: 1.5px solid var(--border); color: var(--muted); }
+.btn-ghost:hover { border-color: var(--primary); color: var(--primary); }
+.mode-tabs { display: flex; gap: 6px; margin-bottom: 20px; }
+.tab { padding: 7px 16px; border-radius: 8px; border: 1.5px solid var(--border); background: transparent; color: var(--muted); font-size: 0.82rem; cursor: pointer; transition: all 0.15s; }
+.tab.active { border-color: var(--primary); background: rgba(56,189,248,0.1); color: var(--primary); }
+.results { text-align: center; padding: 40px 20px; }
+.results h2 { font-size: 1.6rem; margin-bottom: 8px; }
+.results .big-score { font-size: 4rem; font-weight: 800; background: linear-gradient(135deg, var(--primary), var(--accent)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin: 16px 0; }
+.results .sub { color: var(--muted); margin-bottom: 28px; }
+.results-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; max-width: 320px; margin: 0 auto 28px; }
+.results-box { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 16px; }
+.results-box .num { font-size: 1.8rem; font-weight: 700; }
+.results-box .lbl { font-size: 0.75rem; color: var(--muted); margin-top: 4px; }
+.jump-wrap { display: flex; align-items: center; gap: 8px; margin-bottom: 16px; }
+.jump-wrap label { font-size: 0.82rem; color: var(--muted); }
+.jump-wrap input { width: 60px; padding: 6px 10px; border-radius: 6px; border: 1.5px solid var(--border); background: var(--card); color: var(--text); font-size: 0.85rem; text-align: center; }
+.jump-wrap button { padding: 6px 12px; border-radius: 6px; border: 1.5px solid var(--border); background: transparent; color: var(--muted); font-size: 0.8rem; cursor: pointer; }
+.jump-wrap button:hover { border-color: var(--primary); color: var(--primary); }
+.check-btn { width: 100%; margin-top: 14px; padding: 13px; border-radius: 10px; border: none; background: linear-gradient(135deg, var(--primary), var(--accent)); color: #0f172a; font-size: 0.95rem; font-weight: 700; cursor: pointer; display: none; }
+.check-btn.show { display: block; }
+@media (max-width: 480px) { .card { padding: 20px 16px; } .results-grid { grid-template-columns: 1fr 1fr; } }
+</style>
+</head>
+<body>
+<div class="container">
+  <div class="header">
+    <h1>CISO 备考闪卡</h1>
+    <div class="score-panel">
+      <span>正确 <b id="correct-count">0</b></span>
+      <span>错误 <b id="wrong-count" style="color:var(--wrong)">0</b></span>
+      <span>进度 <b id="progress-text">0/191</b></span>
+    </div>
+  </div>
+  <div class="mode-tabs">
+    <button class="tab active" data-mode="normal" onclick="setMode('normal')">学习模式</button>
+    <button class="tab" data-mode="shuffle" onclick="setMode('shuffle')">随机模式</button>
+    <button class="tab" data-mode="review-wrong" onclick="setMode('review-wrong')">复习错题</button>
+  </div>
+  <div class="jump-wrap">
+    <label>跳题:</label>
+    <input type="number" id="jump-input" min="1" max="191" placeholder="1">
+    <button onclick="jumpTo()">跳转</button>
+  </div>
+  <div class="progress-wrap">
+    <div class="progress-bar"><div class="progress-fill" id="progress-fill" style="width:0%"></div></div>
+  </div>
+  <div id="card-area"></div>
+</div>
+<script>
+const QUESTIONS = [];
+let mode = 'normal', order = [], currentIdx = 0, correctCount = 0, wrongCount = 0, answered = false, answeredSet = new Set();
+
+function init() {
+  correctCount = wrongCount = 0;
+  answeredSet.clear();
+  updateStats();
+  setMode('normal');
+}
+
+function setMode(m) {
+  mode = m;
+  document.querySelectorAll('.tab').forEach(t => t.classList.toggle('active', t.dataset.mode === m));
+  if (m === 'shuffle') {
+    order = [...Array(QUESTIONS.length).keys()].sort(() => Math.random() - 0.5);
+  } else if (m === 'review-wrong') {
+    const wrongIdxs = [];
+    for (let i = 0; i < QUESTIONS.length; i++) {
+      if (answeredSet.has(QUESTIONS[i].id) && !QUESTIONS[i]._lastCorrect) wrongIdxs.push(i);
+    }
+    if (wrongIdxs.length === 0) {
+      document.getElementById('card-area').innerHTML = '<div class="card" style="text-align:center;color:var(--muted);padding:40px">没有错题需要复习</div>';
+      return;
+    }
+    order = wrongIdxs.sort(() => Math.random() - 0.5);
+  } else {
+    order = [...Array(QUESTIONS.length).keys()];
+  }
+  currentIdx = 0;
+  renderCard();
+}
+
+function renderCard() {
+  if (order.length === 0) { showResults(); return; }
+  const q = QUESTIONS[order[currentIdx]];
+  const hasOpts = q.options && q.options.length > 0;
+  let optsHtml = '';
+  if (hasOpts) {
+    optsHtml = q.options.map(o => '<div class="option" data-label="'+o.label+'" onclick="selectOption(this,\''+o.label+'\')"><span class="opt-label">'+o.label+'</span><span>'+o.text+'</span></div>').join('');
+  }
+  document.getElementById('card-area').innerHTML = '<div class="card"><span class="card-id">#'+q.id+'</span><div class="stem">'+q.stem+'</div>'+(hasOpts ? optsHtml : '<div style="color:var(--muted);font-size:0.88rem;margin-bottom:12px">（无选项，直接显示答案）</div>')+'<button class="check-btn'+(hasOpts?'':' show')+'" id="check-btn" onclick="revealAnswer()">查看答案 & 解析</button></div><div class="explanation" id="explanation" style="display:none"><strong>答案: '+q.answer+'</strong>'+(q.explanation ? q.explanation : '（无解析）')+'</div><div class="actions"><button class="btn btn-ghost" onclick="prevCard()" '+(currentIdx===0?'disabled style="opacity:0.3"':'')+'>上一题</button><button class="btn btn-primary" onclick="nextCard()">'+(currentIdx >= order.length-1 ? '查看结果' : '下一题')+'</button>'+(hasOpts?'':'<button class="btn btn-primary" onclick="revealAnswer()">显示答案</button>')+'</div>';
+  document.getElementById('progress-fill').style.width = ((currentIdx+1)/order.length*100)+'%';
+  document.getElementById('progress-text').textContent = (currentIdx+1)+'/'+order.length;
+  answered = false;
+}
+
+function selectOption(el, label) {
+  if (answered) return;
+  answered = true;
+  const q = QUESTIONS[order[currentIdx]];
+  const isCorrect = label === q.answer;
+  q._lastCorrect = isCorrect;
+  answeredSet.add(q.id);
+  document.querySelectorAll('.option').forEach(o => o.classList.add('disabled'));
+  el.classList.add(isCorrect ? 'correct' : 'wrong');
+  if (!isCorrect) document.querySelectorAll('.option').forEach(o => { if (o.dataset.label === q.answer) o.classList.add('correct'); });
+  if (isCorrect) correctCount++; else wrongCount++;
+  updateStats();
+  document.getElementById('explanation').style.display = 'block';
+  document.getElementById('check-btn').style.display = 'none';
+}
+
+function revealAnswer() {
+  if (answered) return;
+  answered = true;
+  const q = QUESTIONS[order[currentIdx]];
+  q._lastCorrect = false;
+  answeredSet.add(q.id);
+  wrongCount++;
+  updateStats();
+  if (q.options && q.options.length > 0) {
+    document.querySelectorAll('.option').forEach(o => { o.classList.add('disabled'); if (o.dataset.label === q.answer) o.classList.add('correct'); });
+  }
+  document.getElementById('explanation').style.display = 'block';
+  document.getElementById('check-btn').style.display = 'none';
+}
+
+function nextCard() {
+  currentIdx++;
+  if (currentIdx >= order.length) { showResults(); return; }
+  renderCard();
+}
+
+function prevCard() {
+  if (currentIdx > 0) { currentIdx--; renderCard(); }
+}
+
+function jumpTo() {
+  const n = parseInt(document.getElementById('jump-input').value);
+  if (!n || n < 1 || n > QUESTIONS.length) return;
+  const target = n - 1;
+  const pos = order.indexOf(target);
+  if (pos !== -1) { currentIdx = pos; renderCard(); }
+  else { currentIdx = target; order = [...Array(QUESTIONS.length).keys()]; renderCard(); }
+}
+
+function updateStats() {
+  document.getElementById('correct-count').textContent = correctCount;
+  document.getElementById('wrong-count').textContent = wrongCount;
+}
+
+function showResults() {
+  const total = correctCount + wrongCount;
+  const pct = total > 0 ? Math.round(correctCount / total * 100) : 0;
+  const emoji = pct >= 80 ? '🎉' : pct >= 60 ? '💪' : '📚';
+  document.getElementById('card-area').innerHTML = '<div class="results"><h2>'+emoji+' 阶段完成</h2><div class="big-score">'+pct+'%</div><div class="sub">正确 '+correctCount+' / 错误 '+wrongCount+' / 总计 '+total+'</div><div class="results-grid"><div class="results-box"><div class="num" style="color:var(--correct)">'+correctCount+'</div><div class="lbl">正确</div></div><div class="results-box"><div class="num" style="color:var(--wrong)">'+wrongCount+'</div><div class="lbl">错误</div></div></div><div class="actions" style="justify-content:center"><button class="btn btn-primary" onclick="init()">重新开始</button><button class="btn btn-ghost" onclick="setMode(\'review-wrong\')">复习错题</button></div></div>';
+  document.getElementById('progress-fill').style.width = '100%';
+}
+
+document.addEventListener('keydown', e => {
+  if (e.key === 'ArrowRight' || e.key === 'Enter') nextCard();
+  if (e.key === 'ArrowLeft') prevCard();
+  if (['a','b','c','d','A','B','C','D'].includes(e.key) && !answered) {
+    const q = QUESTIONS[order[currentIdx]];
+    if (q.options && q.options.length > 0) {
+      const el = document.querySelector('.option[data-label="'+e.key.toUpperCase()+'"]');
+      if (el) selectOption(el, e.key.toUpperCase());
+    }
+  }
+});
+
+// Load data
+(function() {
+  const xhr = new XMLHttpRequest();
+  xhr.open('GET', 'data.json', true);
+  xhr.onload = function() {
+    const data = JSON.parse(xhr.responseText);
+    QUESTIONS.length = 0;
+    QUESTIONS.push(...data);
+    init();
+  };
+  xhr.send();
+})();
+</script>
+</body>
+</html>
