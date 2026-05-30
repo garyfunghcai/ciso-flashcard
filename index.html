@@ -209,17 +209,25 @@ body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; b
     var hasOpts = q.options && q.options.length > 0;
     var wasAnswered = answeredSet.has(q.id);
 
+    // Shuffle options on first render (only for unanswered questions)
+    if (hasOpts && !wasAnswered && !q._shuffledOpts) {
+      q._shuffledOpts = shuffleArray(q.options.slice());
+      q._origIndex = {}; // shuffled idx -> original option
+      for (var si = 0; si < q._shuffledOpts.length; si++) {
+        q._origIndex[si] = q.options.indexOf(q._shuffledOpts[si]);
+      }
+    }
+
     var optsHtml = '';
     if (hasOpts) {
-      var labels = ['A', 'B', 'C', 'D'];
-      for (var i = 0; i < q.options.length; i++) {
-        var o = q.options[i];
+      var displayOpts = (wasAnswered && q._shuffledOpts) ? q._shuffledOpts : q.options;
+      for (var i = 0; i < displayOpts.length; i++) {
+        var o = displayOpts[i];
         var cls = 'option';
         if (wasAnswered) {
           if (o.label === q.answer) cls += ' correct';
           else if (answeredSet.get(q.id) === false && o.label === q.userAnswer) cls += ' wrong';
         }
-        // Use onclick with index instead of data-label string matching
         optsHtml += '<div class="' + cls + '" onclick="selectOptionByIndex(' + i + ')">' +
           '<span class="opt-label">' + o.label + '</span>' +
           '<span>' + o.text + '</span></div>';
@@ -255,7 +263,9 @@ body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; b
     if (!q.options || idx < 0 || idx >= q.options.length) { console.error('selectOptionByIndex: bad idx', idx); return; }
     if (answeredSet.has(q.id)) return; // already answered
 
-    var selectedOption = q.options[idx];
+    // Use the shuffled options display order
+    var displayOpts = q._shuffledOpts || q.options;
+    var selectedOption = displayOpts[idx];
     var label = selectedOption.label;
     var isCorrect = label === q.answer;
 
@@ -306,12 +316,13 @@ body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; b
       updateStats();
       saveProgress();
     }
+    var displayOpts = q._shuffledOpts || q.options;
     var opts = document.querySelectorAll('.option');
     for (var i = 0; i < opts.length; i++) {
       opts[i].classList.add('disabled');
       opts[i].style.pointerEvents = 'none';
-      // Highlight correct
-      if (q.options && q.options[i] && q.options[i].label === q.answer) {
+      // Highlight correct using displayOpts
+      if (displayOpts[i] && displayOpts[i].label === q.answer) {
         opts[i].classList.add('correct');
       }
     }
@@ -375,10 +386,12 @@ body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; b
     if (e.key === 'ArrowRight' || e.key === 'Enter') { nextCard(); return; }
     if (e.key === 'ArrowLeft') { prevCard(); return; }
     var q = QUESTIONS[order[currentIdx]];
-    if (!q || !q.options) return;
+    if (!q) return;
+    var displayOpts = q._shuffledOpts || q.options;
+    if (!displayOpts) return;
     var keyMap = { 'a': 0, 'b': 1, 'c': 2, 'd': 3, 'A': 0, 'B': 1, 'C': 2, 'D': 3 };
     var idx = keyMap[e.key];
-    if (idx !== undefined && !answeredSet.has(q.id)) {
+    if (idx !== undefined && !answeredSet.has(q.id) && idx < displayOpts.length) {
       selectOptionByIndex(idx);
     }
   });
