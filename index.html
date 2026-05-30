@@ -290,9 +290,9 @@ body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; b
       opts[idx].classList.add('correct');
     } else {
       opts[idx].classList.add('wrong');
-      // Show correct answer
-      for (var j = 0; j < q.options.length; j++) {
-        if (q.options[j].label === q.answer) {
+      // Show correct answer - find it in displayOpts order (shuffled)
+      for (var j = 0; j < displayOpts.length; j++) {
+        if (displayOpts[j].label === q.answer) {
           opts[j].classList.add('correct');
           break;
         }
