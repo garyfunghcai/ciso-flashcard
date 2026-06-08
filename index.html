@@ -34,6 +34,7 @@ body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; b
 .option.wrong .opt-label { border-color: var(--wrong); background: var(--wrong); color: #fff; }
 .option.disabled { cursor: default; opacity: 0.85; }
 .explanation { background: rgba(167,139,250,0.1); border: 1px solid rgba(167,139,250,0.3); border-radius: 10px; padding: 14px 16px; margin-top: 16px; font-size: 0.88rem; line-height: 1.6; color: #c4b5fd; }
+.stem img.img-broken { display: block; width: 100%; min-height: 80px; max-height: 140px; background: repeating-linear-gradient(45deg, rgba(239,68,68,0.08), rgba(239,68,68,0.08) 10px, rgba(239,68,68,0.15) 10px, rgba(239,68,68,0.15) 20px); border: 1.5px dashed rgba(239,68,68,0.5); border-radius: 8px; color: #ef4444; font-size: 0.85rem; line-height: 80px; text-align: center; padding: 0 16px; margin: 8px 0; box-sizing: border-box; object-fit: none; }
 .explanation strong { color: var(--accent); display: block; margin-bottom: 4px; }
 .actions { display: flex; gap: 10px; flex-wrap: wrap; }
 .btn { padding: 10px 20px; border-radius: 10px; border: none; font-size: 0.9rem; cursor: pointer; transition: all 0.15s; font-weight: 600; }
@@ -199,6 +200,15 @@ body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; b
     return a;
   }
 
+  // ─── Sanitize stem: inject onerror fallback for broken image refs ───
+  function sanitizeStem(s) {
+    if (!s) return '';
+    return String(s).replace(/<img\b([^>]*?)>/gi, function(m, attrs) {
+      if (/\sonerror\s*=/i.test(attrs)) return m;  // already has onerror
+      return '<img' + attrs + ' onerror="this.classList.add(\'img-broken\'); this.alt=\'图片缺失\'; this.removeAttribute(\'src\');">';
+    });
+  }
+
   // ─── Render ─────────────────────────────────────────────────────
   function renderCard() {
     if (order.length === 0) { showResults(); return; }
@@ -228,7 +238,7 @@ body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; b
     var explanationDisplay = wasAnswered ? 'block' : 'none';
 
     var html = '<div class="card"><span class="card-id">#' + q.id + '</span>' +
-      '<div class="stem">' + q.stem + '</div>' +
+      '<div class="stem">' + sanitizeStem(q.stem) + '</div>' +
       (hasOpts ? optsHtml : '<div style="color:var(--muted);font-size:0.88rem;margin-bottom:12px">（无选项，直接显示答案）</div>') +
       '<button class="check-btn' + (showCheckBtn ? ' show' : '') + '" id="check-btn" onclick="revealAnswer()">查看答案 & 解析</button>' +
       '</div>' +
