@@ -1,617 +1,444 @@
 <!DOCTYPE html>
-<html lang="zh-Hant">
+<html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>CISO 備考閃卡</title>
+<title>CISO 备考闪卡</title>
 <style>
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-  :root {
-    --bg: #0f0f1e;
-    --card: #1a1a35;
-    --card2: #252548;
-    --primary: #6366f1;
-    --primary-l: #818cf8;
-    --accent: #a78bfa;
-    --text: #e2e8f0;
-    --text-d: #94a3b8;
-    --green: #10b981;
-    --red: #ef4444;
-    --yellow: #f59e0b;
-    --border: #334155;
-  }
-  body {
-    font-family: -apple-system, "Segoe UI", "Noto Sans TC", "PingFang TC", "Microsoft JhengHei", sans-serif;
-    background: linear-gradient(135deg, #1e1b4b 0%, #0f0f1e 50%, #4c1d95 100%);
-    color: var(--text);
-    min-height: 100vh;
-    padding: 16px;
-    line-height: 1.6;
-  }
-  .container { max-width: 760px; margin: 0 auto; }
-  header { text-align: center; margin-bottom: 24px; padding: 20px 0; }
-  h1 {
-    font-size: 28px;
-    background: linear-gradient(90deg, #818cf8, #c084fc, #f472b6);
-    -webkit-background-clip: text;
-    background-clip: text;
-    -webkit-text-fill-color: transparent;
-    margin-bottom: 4px;
-  }
-  .subtitle { color: var(--text-d); font-size: 13px; }
-  
-  .stats {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 8px;
-    margin-bottom: 16px;
-  }
-  .stat-box {
-    background: rgba(99, 102, 241, 0.1);
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    padding: 10px 8px;
-    text-align: center;
-  }
-  .stat-num { font-size: 20px; font-weight: 700; }
-  .stat-lbl { font-size: 11px; color: var(--text-d); margin-top: 2px; }
-  .stat-correct { color: var(--green); }
-  .stat-wrong { color: var(--red); }
-  .stat-bookmark { color: var(--yellow); }
-  .stat-remaining { color: var(--primary-l); }
-  
-  .controls {
-    display: flex;
-    gap: 8px;
-    flex-wrap: wrap;
-    margin-bottom: 16px;
-  }
-  select, button {
-    background: var(--card2);
-    color: var(--text);
-    border: 1px solid var(--border);
-    border-radius: 6px;
-    padding: 8px 12px;
-    font-size: 13px;
-    cursor: pointer;
-    transition: all 0.15s;
-  }
-  button:hover { background: var(--primary); border-color: var(--primary); }
-  button.primary { background: var(--primary); border-color: var(--primary); }
-  button.primary:hover { background: var(--primary-l); }
-  select { flex: 1; min-width: 140px; }
-  
-  .progress-bar {
-    width: 100%;
-    height: 4px;
-    background: var(--card2);
-    border-radius: 2px;
-    overflow: hidden;
-    margin-bottom: 16px;
-  }
-  .progress-fill {
-    height: 100%;
-    background: linear-gradient(90deg, var(--primary), var(--accent));
-    transition: width 0.3s;
-  }
-  
-  .question-card {
-    background: var(--card);
-    border: 1px solid var(--border);
-    border-radius: 12px;
-    padding: 24px;
-    box-shadow: 0 4px 16px rgba(0,0,0,0.2);
-  }
-  .q-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 12px;
-    font-size: 13px;
-  }
-  .q-id { color: var(--primary-l); font-weight: 600; }
-  .q-cat {
-    background: rgba(99, 102, 241, 0.2);
-    padding: 2px 10px;
-    border-radius: 12px;
-    font-size: 11px;
-    color: var(--accent);
-  }
-  .q-actions { display: flex; gap: 6px; }
-  .q-actions button { padding: 4px 10px; font-size: 12px; }
-  .q-bookmarked { color: var(--yellow); border-color: var(--yellow) !important; }
-  
-  .q-text {
-    font-size: 15px;
-    line-height: 1.7;
-    margin-bottom: 18px;
-    color: var(--text);
-  }
-  .q-img {
-    max-width: 100%;
-    max-height: 360px;
-    border-radius: 8px;
-    margin: 8px 0;
-    display: block;
-    border: 1px solid var(--border);
-    background: rgba(255,255,255,0.04);
-  }
-  .q-fade {
-    position: relative;
-  }
-  .q-fade::after {
-    content: '';
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    height: 40px;
-    background: linear-gradient(transparent, var(--card));
-    pointer-events: none;
-  }
-  .q-toggle {
-    background: rgba(99, 102, 241, 0.15);
-    border: 1px dashed var(--primary-l);
-    color: var(--primary-l);
-    border-radius: 6px;
-    padding: 4px 10px;
-    font-size: 11px;
-    cursor: pointer;
-    margin: 4px 0 14px;
-    display: block;
-    width: 100%;
-  }
-  .q-toggle:hover { background: rgba(99, 102, 241, 0.3); }
-  
-  .options { display: flex; flex-direction: column; gap: 8px; }
-  .opt {
-    background: var(--card2);
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    padding: 12px 14px;
-    cursor: pointer;
-    transition: all 0.15s;
-    display: flex;
-    align-items: flex-start;
-    gap: 10px;
-    user-select: none;
-  }
-  .opt:hover:not(.disabled) { border-color: var(--primary); transform: translateX(2px); }
-  .opt-key {
-    flex-shrink: 0;
-    width: 24px;
-    height: 24px;
-    background: var(--card);
-    border: 1px solid var(--border);
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-weight: 600;
-    font-size: 12px;
-    color: var(--text-d);
-  }
-  .opt.correct { background: rgba(16, 185, 129, 0.15); border-color: var(--green); }
-  .opt.correct .opt-key { background: var(--green); color: white; border-color: var(--green); }
-  .opt.wrong { background: rgba(239, 68, 68, 0.15); border-color: var(--red); }
-  .opt.wrong .opt-key { background: var(--red); color: white; border-color: var(--red); }
-  .opt.disabled { cursor: default; }
-  
-  .feedback {
-    margin-top: 14px;
-    padding: 12px;
-    border-radius: 8px;
-    font-size: 14px;
-    display: none;
-  }
-  .feedback.show { display: block; }
-  .feedback.right { background: rgba(16, 185, 129, 0.1); border: 1px solid var(--green); }
-  .feedback.wrong { background: rgba(239, 68, 68, 0.1); border: 1px solid var(--red); }
-  
-  .nav {
-    display: flex;
-    justify-content: space-between;
-    margin-top: 18px;
-    gap: 8px;
-  }
-  .nav button { flex: 1; }
-  
-  .hint {
-    text-align: center;
-    color: var(--text-d);
-    font-size: 11px;
-    margin-top: 16px;
-  }
-  .hint kbd {
-    background: var(--card2);
-    border: 1px solid var(--border);
-    border-radius: 3px;
-    padding: 1px 6px;
-    font-family: monospace;
-    font-size: 10px;
-  }
-  
-  .toast {
-    position: fixed;
-    bottom: 24px;
-    left: 50%;
-    transform: translateX(-50%) translateY(100px);
-    background: var(--card2);
-    border: 1px solid var(--primary);
-    color: var(--text);
-    padding: 10px 18px;
-    border-radius: 8px;
-    font-size: 13px;
-    opacity: 0;
-    transition: all 0.3s;
-    pointer-events: none;
-    z-index: 100;
-  }
-  .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
-  
-  .empty-state {
-    text-align: center;
-    padding: 60px 20px;
-    color: var(--text-d);
-  }
+* { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --bg: #0f172a; --card: #1e293b; --border: #334155;
+  --primary: #38bdf8; --accent: #a78bfa; --correct: #22c55e;
+  --wrong: #ef4444; --text: #e2e8f0; --muted: #94a3b8; --gold: #fbbf24;
+}
+body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+.container { max-width: 680px; margin: 0 auto; padding: 20px; }
+.header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; flex-wrap: wrap; gap: 12px; }
+.header h1 { font-size: 1.4rem; color: var(--primary); }
+.score-panel { display: flex; gap: 16px; font-size: 0.85rem; }
+.score-panel span { color: var(--muted); }
+.score-panel b { color: var(--gold); }
+.progress-wrap { margin-bottom: 20px; }
+.progress-bar { height: 6px; background: var(--border); border-radius: 3px; overflow: hidden; margin-top: 6px; }
+.progress-fill { height: 100%; background: linear-gradient(90deg, var(--primary), var(--accent)); transition: width 0.4s ease; border-radius: 3px; }
+.card { background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 28px; margin-bottom: 20px; position: relative; }
+.card-id { position: absolute; top: 16px; right: 20px; font-size: 0.75rem; color: var(--muted); background: var(--bg); padding: 3px 10px; border-radius: 20px; }
+.stem { font-size: 1.05rem; line-height: 1.7; margin-bottom: 20px; padding-right: 50px; }
+.option { display: flex; align-items: center; gap: 12px; padding: 14px 16px; border: 1.5px solid var(--border); border-radius: 10px; margin-bottom: 10px; cursor: pointer; transition: all 0.15s; font-size: 0.95rem; line-height: 1.4; touch-action: manipulation; -webkit-tap-highlight-color: transparent; user-select: none; }
+.option:hover:not(.disabled) { border-color: var(--primary); background: rgba(56,189,248,0.06); transform: translateY(-1px); box-shadow: 0 4px 12px rgba(0,0,0,0.3); }
+.option:active:not(.disabled) { transform: translateY(0); }
+.option .opt-label { min-width: 28px; height: 28px; border-radius: 50%; border: 2px solid var(--border); display: flex; align-items: center; justify-content: center; font-size: 0.8rem; font-weight: 700; flex-shrink: 0; transition: all 0.15s; }
+.option.correct { border-color: var(--correct); background: rgba(34,197,94,0.1); }
+.option.correct .opt-label { border-color: var(--correct); background: var(--correct); color: #fff; }
+.option.wrong { border-color: var(--wrong); background: rgba(239,68,68,0.1); }
+.option.wrong .opt-label { border-color: var(--wrong); background: var(--wrong); color: #fff; }
+.option.disabled { cursor: default; opacity: 0.85; }
+.explanation { background: rgba(167,139,250,0.1); border: 1px solid rgba(167,139,250,0.3); border-radius: 10px; padding: 14px 16px; margin-top: 16px; font-size: 0.88rem; line-height: 1.6; color: #c4b5fd; }
+.stem img { display: none !important; }
+.stem img.img-broken { display: none !important; }
+.explanation strong { color: var(--accent); display: block; margin-bottom: 4px; }
+.actions { display: flex; gap: 10px; flex-wrap: wrap; }
+.btn { padding: 10px 20px; border-radius: 10px; border: none; font-size: 0.9rem; cursor: pointer; transition: all 0.15s; font-weight: 600; }
+.btn-primary { background: linear-gradient(135deg, var(--primary), var(--accent)); color: #0f172a; }
+.btn-primary:hover { opacity: 0.88; transform: translateY(-1px); }
+.btn-ghost { background: transparent; border: 1.5px solid var(--border); color: var(--muted); }
+.btn-ghost:hover { border-color: var(--primary); color: var(--primary); }
+.mode-tabs { display: flex; gap: 6px; margin-bottom: 20px; }
+.tab { padding: 7px 16px; border-radius: 8px; border: 1.5px solid var(--border); background: transparent; color: var(--muted); font-size: 0.82rem; cursor: pointer; transition: all 0.15s; }
+.tab.active { border-color: var(--primary); background: rgba(56,189,248,0.1); color: var(--primary); }
+.results { text-align: center; padding: 40px 20px; }
+.results h2 { font-size: 1.6rem; margin-bottom: 8px; }
+.results .big-score { font-size: 4rem; font-weight: 800; background: linear-gradient(135deg, var(--primary), var(--accent)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin: 16px 0; }
+.results .sub { color: var(--muted); margin-bottom: 28px; }
+.results-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; max-width: 320px; margin: 0 auto 28px; }
+.results-box { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 16px; }
+.results-box .num { font-size: 1.8rem; font-weight: 700; }
+.results-box .lbl { font-size: 0.75rem; color: var(--muted); margin-top: 4px; }
+.jump-wrap { display: flex; align-items: center; gap: 8px; margin-bottom: 16px; }
+.jump-wrap label { font-size: 0.82rem; color: var(--muted); }
+.jump-wrap input { width: 60px; padding: 6px 10px; border-radius: 6px; border: 1.5px solid var(--border); background: var(--card); color: var(--text); font-size: 0.85rem; text-align: center; }
+.jump-wrap button { padding: 6px 12px; border-radius: 6px; border: 1.5px solid var(--border); background: transparent; color: var(--muted); font-size: 0.8rem; cursor: pointer; }
+.jump-wrap button:hover { border-color: var(--primary); color: var(--primary); }
+.check-btn { width: 100%; margin-top: 14px; padding: 13px; border-radius: 10px; border: none; background: linear-gradient(135deg, var(--primary), var(--accent)); color: #0f172a; font-size: 0.95rem; font-weight: 700; cursor: pointer; display: none; }
+.check-btn.show { display: block; }
+.stat-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
+.stat-bar .left { display: flex; gap: 12px; }
+.stat-bar .reset-btn { background: none; border: none; color: var(--muted); font-size: 0.78rem; cursor: pointer; padding: 4px 8px; border-radius: 4px; }
+.stat-bar .reset-btn:hover { color: var(--wrong); }
+@media (max-width: 480px) { .card { padding: 20px 16px; } .results-grid { grid-template-columns: 1fr 1fr; } }
 </style>
 </head>
 <body>
 <div class="container">
-  <header>
-    <h1>🛡️ CISO 備考閃卡</h1>
-    <div class="subtitle">註冊信息安全專業人員 · 303 題 · 來源 npcola/CISP</div>
-  </header>
-  
-  <div class="stats">
-    <div class="stat-box">
-      <div class="stat-num stat-correct" id="stat-correct">0</div>
-      <div class="stat-lbl">答對</div>
-    </div>
-    <div class="stat-box">
-      <div class="stat-num stat-wrong" id="stat-wrong">0</div>
-      <div class="stat-lbl">答錯</div>
-    </div>
-    <div class="stat-box">
-      <div class="stat-num stat-bookmark" id="stat-bookmark">0</div>
-      <div class="stat-lbl">書籤</div>
-    </div>
-    <div class="stat-box">
-      <div class="stat-num stat-remaining" id="stat-remaining">0</div>
-      <div class="stat-lbl">未答</div>
+  <div class="header">
+    <h1>CISO 备考闪卡</h1>
+    <div class="score-panel">
+      <span>正确 <b id="correct-count">0</b></span>
+      <span>错误 <b id="wrong-count" style="color:var(--wrong)">0</b></span>
+      <span>进度 <b id="progress-text">0/193</b></span>
     </div>
   </div>
-  
-  <div class="controls">
-    <select id="filter-cat">
-    <option value="all" selected>📚 全部題目</option>
-</select>
-    <select id="filter-mode">
-      <option value="all">🎯 全部題目</option>
-      <option value="wrong">❌ 答錯題目</option>
-      <option value="bookmark">⭐ 書籤題目</option>
-      <option value="unanswered">🆕 未答題目</option>
-      <option value="cloze">🧩 挖空題 (13)</option>
-    </select>
-    <button id="shuffle" title="隨機打亂">🔀 洗牌</button>
-    <button id="export" title="匯出進度">💾 匯出</button>
-    <button id="import" title="匯入進度">📂 匯入</button>
-    <button id="reset" title="重置所有進度">🔄 重置</button>
+  <div class="stat-bar">
+    <div class="left">
+      <div class="mode-tabs">
+        <button class="tab active" data-mode="normal" onclick="setMode('normal')">学习模式</button>
+        <button class="tab" data-mode="shuffle" onclick="setMode('shuffle')">随机模式</button>
+        <button class="tab" data-mode="review-wrong" onclick="setMode('review-wrong')">复习错题</button>
+      </div>
+    </div>
+    <button class="reset-btn" onclick="resetProgress()">清除记录</button>
   </div>
-  
-  <div class="progress-bar">
-    <div class="progress-fill" id="progress"></div>
+  <div class="jump-wrap">
+    <label>跳题:</label>
+    <input type="number" id="jump-input" min="1" max="193" placeholder="1">
+    <button onclick="jumpTo()">跳转</button>
   </div>
-  
-  <div id="content"></div>
-  
-  <div class="hint">
-    <kbd>1</kbd><kbd>2</kbd><kbd>3</kbd><kbd>4</kbd> 揀答案 ·
-    <kbd>Space</kbd> 下一題 ·
-    <kbd>B</kbd> 書籤 ·
-    <kbd>R</kbd> 答案 ·
-    <kbd>E</kbd> 展開題目
+  <div class="progress-wrap">
+    <div class="progress-bar"><div class="progress-fill" id="progress-fill" style="width:0%"></div></div>
   </div>
+  <div id="card-area"></div>
 </div>
-
-<div class="toast" id="toast"></div>
-
 <script>
-// === 題庫 ===
-const QUESTIONS = [{"id": 1, "q": "1.根据相关标准，信息安全风险管理可分为背景建立、风险评估、风险处理、批准监督、监控审查和沟通咨询等阶段，按照该框架，文档《风险分析报告》应属于哪个阶段的输出成果（）.", "opts": {"A": "风险评估", "B": "风险处理", "C": "批准监督", "D": "监控审查"}, "a": "A", "cat": "CISO", "explanation": "", "cloze": false, "blanks": 1, "fold_point": null}, {"id": 2, "q": "2.软件存在漏洞和缺陷是不可避免的，实践中常用软件缺陷密度（Defects/KLOC）来衡量软件的安全性，假设某个软件共有29.6万行源代码，总共被检测出145个缺陷啊，则可以计算出其软件缺陷密度值是（）.", "opts": {"A": "0.00049", "B": "0.049", "C": "0.49", "D": "49"}, "a": "C", "cat": "CISO", "explanation": "145/296=0.49", "cloze": false, "blanks": 1, "fold_point": null}, {"id": 3, "q": "3.某商贸公司信息安全管理员考虑到信息系统对业务影响越来越重要,计划编制本单位信息安全应急响应预案,在向主管领导写报告时,他列举了编制信息安全应急响应预案的好处和重要性,在他罗列的四条理由中,其中不适合作为理由的一条是（）.", "opts": {"A": "应急预案是明确关键业务系统信息安全应急响应指挥体系和工作机制的重要方式", "B": "应急预案是提高应对网络和信息系统突发事件能力,减少突发事件造成的损失和危害,保障信息系统运行平稳、安全、有序、高效的手段", "C": "编制应急预案是国家网络安全法对所有单位的强制要求,因此必须建设", "D": "应急预案是保障单位业务系统信息安全的重要措施"}, "a": "D", "cat": "CISO", "explanation": "AB书上应急预案章节有，C明文法条，D是一个没有出处的说法", "cloze": false, "blanks": 1, "fold_point": null}, {"id": 4, "q": "4.根据《信息安全等级保护管理办法》、《关于开展信息安全等级保护测评体系建设试点工作的通知》（公信安【2009】812号）、关于推动信息安全等级保护（）建设和开展（）工作的通知（公信安【2010】303号）等文件，由公安部（）对等级保护测评机构管理，接受测评机构的申请、考核和定期（），对不具备能力的测评机构则（）", "opts": {"A": "等级测评，测评体系，等级保护评估中心，能力验证：取消授权", "B": "测评体系：等级保护评估中心，等级测评，能力验证：取消授权", "C": "测评体系：等级测评，等级保护评估中心：能力验证，取消授权", "D": "测评体系：等级保护评估中心，能力验证：等级测评：取消授权"}, "a": "C", "cat": "CISO", "explanation": "网络资料 1)测评机构及人员管理依据 根据《信息安全等级保护管理办法》、《关于开展信息安全等级保护测评体系建设试点工作的通知》(公信安[20091812号)、关于推动信息安全等级保护测评体系建设和开展等级测评工作的通知(公信安[2010]303号)等文件，由公安部等级保护评估中心对等级保护测评机构管理，接受测评机构的申请、考核和定期能力验证。对不具备能力的测评机构取消授权。", "cloze": true, "blanks": 5, "fold_point": 135}, {"id": 5, "q": "5.以下关于检查评估和自评估说法错误的是（）.", "opts": {"A": "信息安全风险评估分自评估、检查评估两形式，应以检查评估为主，自评估和检查评估相互结合、互为补充", "B": "信息安全风险评估工作要按照“严密组织、规范操作、讲求科学、注重实效‘的原则开展", "C": "信息安全风险评估应管贯穿于网络和信息系统建设运行的全过程", "D": "开展信息安全风险评估工作应加强信息安全风险评估工作的组织领导"}, "a": "A", "cat": "CISO", "explanation": "以自评估为主", "cloze": false, "blanks": 1, "fold_point": null}, {"id": 6, "q": "6.规范的实施流程和文档管理，是信息安全风险评估能否取得成果的重要基础。某单位在实施风险评估时，按照规范形成了若干文档，其中，下面（）中的文档应属于风险评估中“风险要素识别”阶段输出的文档。", "opts": {"A": "《风险评估方案》，主要包括本次风险评估的目的、范围、目标、评估步骤、经费预算和进度安排等内容", "B": "《风险评估方法和工具列表》，主要包括拟用的风险评估方法和测试评估工具等内容", "C": "《风险评估准则要求》，主要包括风险评估参考标准、采用的风险分析方法、资产分类标准等内容", "D": "《已有安全措施列表》，主要包括经检查确认后的已有技术和管理各方面安全措施等内容"}, "a": "D", "cat": "CISO", "explanation": "", "cloze": false, "blanks": 1, "fold_point": null}, {"id": 7, "q": "7.王工是某单位的系统管理员，他在某次参加了单位组织的风险管理工作时，根据任务安排，他根据已有的资产列表，逐个分析可能危害这些资产的主体、动机、途径等多种因素，分析这些因素出现及造成损失的可能性大小，并为其赋值。请问，他这个工作属于下面哪一个阶段的工作().", "opts": {"A": "资产识别并赋值", "B": "脆弱性识别并赋值", "C": "威胁识别并赋值", "D": "确认已有的安全措施并赋值"}, "a": "C", "cat": "CISO", "explanation": "判断威胁出现的频率是威胁赋值的重要内容", "cloze": false, "blanks": 1, "fold_point": null}, {"id": 8, "q": "8.应急响应是信息安全事件管理的重要内容，基于响应工作的特点和事件的不规则性，事先制定出事件应急响应方法和过程，有助于一个组织在事件发生阻止混乱的发生活是在混乱状态中迅速恢复控制，将损失和负面影响降到最低，应急响应方法和过程并不是唯一的。一种被广泛为接受的应急响应方法是将应急响应管理过程分为6个阶段，为准备→检测→遏制→根除→恢复→跟踪总结，请问下列说法有关于信息安全应急响应管理过程错误的是（）.", "opts": {"A": "确定重要资产和风险，实施针对风险的防护措施是信息安全应急响应规划过程中最关键的步骤", "B": "在检测阶段，首先要进行监测、报告级信息收集", "C": "遏制措施可能会因为事件的类别和级别不同而完全不同，常见的遏制措施有；完全关闭所以系统、拔掉网线等", "D": "应按照应急响应计划中事先制定的业务恢复优先顺序和恢复步骤，顺次恢复相关的系统"}, "a": "A", "cat": "CISO", "explanation": "教材P152,编制管理应急响应计划才是最重要的", "cloze": false, "blanks": 1, "fold_point": null}, {"id": 9, "q": "9.常见的访问控制模型包括自主访问控制模型、强制访问控制模型和基于角色的访问控制模型等，下面描述中错误的是（）", "opts": {"A": "从安全性等级来看，这三个模型安全性从低到高的排序是自主访问控制模型，强制访问控制模型和基于角色的访问控制模型", "B": "自主访问控制是一种广泛应用的方法，资源的所有者（往往也是创建者）可以规定谁有权利访问他们的资源，具有较好的易用性和可扩展性", "C": "强制访问控制模型要求主体和客体都有一个固定的安全属性，系统用该安全属性来决定一个主体是否可以访问某个客体，该模型具有一定的抗恶意程序攻击能力，适用于专用或安全性要求较高的系统", "D": "基于角色的访问控制模型的基本思想是根据用户所担任的角色来决定用户在系统中的访问权限，该模型便于实施授权管理和安全约束，容易实现最小特权，职责分离等各种安全策略"}, "a": "A", "cat": "CISO", "explanation": "安全性最高的是强制访问控制模型", "cloze": false, "blanks": 1, "fold_point": null}, {"id": 10, "q": "10.Gary MoGrow博士及其合作都提出软件安全应由三根支柱来支撑，这三个支柱是（）", "opts": {"A": "测代码审核，风险分析和渗透测试", "B": "应用风险管理，软件安全接触点和安全知识", "C": "威胁建模，渗透测试和软件安全接触点", "D": "威胁建模，测代码审核和模模糊测试"}, "a": "B", "cat": "CISO", "explanation": "软件安全开发章节", "cloze": false, "blanks": 1, "fold_point": null}, {"id": 11, "q": "11.由于Internet安全问题日益突出，基于TCP／IP协议，相关组织和专家在协议的不同层次设计了相应的安全通信协议，用来保障网络各层次的安全，其中，属于或依俯于传输层的安全协议是（）", "opts": {"A": "PP2P", "B": "L2TP", "C": "SSL", "D": "IPSec"}, "a": "C", "cat": "CISO", "explanation": "", "cloze": false, "blanks": 1, "fold_point": null}, {"id": 12, "q": "12.保护-检测-响应（Protection-Detection-Hesponse,PDR）模型是（）工作中常用的模型，其思想是承认（）中漏洞的存在，正视系统面临的（）。通过采取适度防护、加强（）、落实对安全事件的响应、建立对威胁的防护来保障系统的安全", "opts": {"A": "信息系统；信息安全保障；威胁；检测工作", "B": "信息安全保障；信息系统；检测工作；威胁", "C": "信息安全保障；信息系统；威胁；检测工作", "D": "信息安全保障；威胁；信息系统；检测工作"}, "a": "C", "cat": "CISO", "explanation": "教材P25", "cloze": true, "blanks": 4, "fold_point": 110}, {"id": 13, "q": "13.若一个组织声称自己的ISMS符合ISO/IBC 27001或GB/T22080标准要求，其信息安全控制措施通常在以下方面实施常规控制，资产管理包含对资产负责和信息分类两个控制目标，对资产负责的控制目标是实现和保护对组织资产的适当保护，这一控制目标的实现由以下控制措施的落实来保障，不包括哪一项（）.", "opts": {"A": "资产清单", "B": "资产负责人", "C": "资产的可接受使用", "D": "分类指南、信息的标记和处理"}, "a": "D", "cat": "CISO", "explanation": "管理章节", "cloze": false, "blanks": 1, "fold_point": null}, {"id": 14, "q": "14.恢复时间目标（Recovery Time Objective,RTO）和恢复点目标（Recovery Point Objective,RE）连续性和灾难恢复工作中的两个重要指标，随着信息系统越来越重要和信息技术越来越先进，越来越小。小华准为其工作的信息系统拟定RTO和RPO指标，则以下描述中，正确的是（）.", "opts": {"A": "RTO可以为0，RPO也可以为0", "B": "RTO可以为0，RPO不可以为0", "C": "RTO不可以为0，RPO可以为0", "D": "RTO不可以为0，RPO也不可以为0"}, "a": "A", "cat": "CISO", "explanation": "时代在进步，已经可以实现双活了", "cloze": false, "blanks": 1, "fold_point": null}, {"id": 15, "q": "15.关于信息安全事件管理和应急响应，以下说法错误的是（）.", "opts": {"A": "应急响应是指组织为了应对突发/重大信息安全事件的发生所做的准备，以及在事件发生后所采取的措施", "B": "应急响应方法，将应急响应管理过程分为遏制、根除、处置、恢复、报告和跟踪6个阶段", "C": "对信息安全事件的分级主要参考信息系统的重要程度，系统损失和社会影响三方面因素", "D": "根据信息安全事件的分级参考要素，可将信息安全事件划分为4个级别；特别重大事件（I级）、重大事件（II级）、较大事件（III级）和一般事件（IV级）"}, "a": "B", "cat": "CISO", "explanation": "PDCERF六步法第一步是准备", "cloze": false, "blanks": 1, "fold_point": null}, {"id": 16, "q": "16.某集团公司信息安全管理员根据领导安排制定了下一年的度的培训工作计划，提出了四大培训任务和目标，关于这中个培训任务和目标，作为主管领导，以下选项中不合理的是（C）", "opts": {"A": "由于网络安全上升到国家安全的高度，网络安全必须得到足够的重视，因此安排了对集团公司下属单位的部经理（一把手）的网络安全法培训", "B": "对下级单位的网络安全管理岗人员实施全面安全培训，建议通过CISP培训以确保人员能力得到保障", "C": "对其他信息化相关人员（网络管理员、软件开发人员）也进行安全基础培训，使相关人员对网络安全有所了解", "D": "对全体员工安排信息安全意识及基础安全知识培训，实现全员信息安全意识教育"}, "a": "C", "cat": "CISO", "explanation": "（网络管理员、软件开发人员）实施全面安全培训，建议通过CISP培训以确保人员能力得到保障", "cloze": false, "blanks": 0, "fold_point": null}, {"id": 17, "q": "17.残余风险是风险管理中的一个重要概念。在信息安全风险管理中，关于残余风险描述错误的是（）.", "opts": {"A": "残余风险是采取了安全措施后，仍然可能存在的风险，一般来说，是在综合考虑了安全成本与效益后不去控制的风险", "B": "残余风险应受到密切监理，它会随着时间的推移而发生变化，可能会在将来诱发新的安全事件", "C": "实施风险处理时，应将残余风险清单告知信息系统所在组织的高管，使其了解残余风险的存在和可能造成的后果", "D": "信息安全风险处理的主要准则是尽可能降低和控制信息安全风险，以最小的残余风险值作为风险管理效果评估指标"}, "a": "D", "cat": "CISO", "explanation": "残余风险不用最小，达到可接受程度即可，P244", "cloze": false, "blanks": 1, "fold_point": null}, {"id": 18, "q": "18.以下关于威胁建模流程步骤说法不正确的是（）", "opts": {"A": "威胁建模主要流程包括四步：确定建模对象、识别威胁、评估威胁和消减威胁", "B": "评估威胁是对威胁进行分析，评估被利用和攻击发生的概率，了解被攻击后资产的受损后果，并计算风险", "C": "消减威胁是根据威胁的评估结果，确定是否要消除该威胁以及消减的技术措施，可以通过重新设计直接消除威胁，或设计采用技术手段来消减威胁。", "D": "识别威胁是发现组件或进程存在的威胁，它可能是恶意的，威胁就是漏洞。"}, "a": "D", "cat": "CISO", "explanation": "D是编的 威胁建模四步：确定对象、识别威胁、评估威胁、消减威胁 评估威胁：对威胁进行分析，评估被利用和攻击发生的概率，了解被攻击后资产的受损后果，并计算风险。 消减威胁：根据威胁的评估结果，确定是否要消除该威胁以及消减的技术措施。在设计阶段 可以通过重新设计，以直接消除威胁，或设计采用技术手段来消减威胁在本阶段， 应在确定消减威胁手段后继续评估是否可以接受残余的安全风险。", "cloze": false, "blanks": 1, "fold_point": null}, {"id": 19, "q": "19.小李在某单位是负责信息安全风险管理方面工作的部门领导，主要负责对所在行业的新人进行基本业务素质培训，一次培训的时候，小李主要负责讲解风险评估方法。请问小李的所述论点中错误的是哪项：（）", "opts": {"A": "风险评估方法包括：定性风险分析、定量风险分析以及半定量风险分析", "B": "定性风险分析需要凭借分析者的经验和直觉或者业界的标准和惯例，因此具有随意性", "C": "定量风险分析试图在计算风险评估与成本效益分析期间收集的各个组成部分的具体数字值，因此更具客观性", "D": "半定量风险分析技术主要指在风险分析过程中综合使用定性和定量风险分析技术对风险要素的赋值方式，实现对风险各要素的度量数值化"}, "a": "B", "cat": "CISO", "explanation": "不是随意性。是主观性 评估章节", "cloze": false, "blanks": 1, "fold_point": null}, {"id": 20, "q": "20.Kerberos协议是常用的集中访问控制协议，通过可信第三方的认证服务，减轻应用服务器的负担，Kerberos的动行环境由密钥分发中心（KDC）、应用服务器和客户端三个部分组成，其中，KDC分为认证服务器AS和篡改授权服务器TGS两部分，下图展示了Kerberos协议的三个阶段，分别 为（I）Kerberos获得服务许可票据，（2）Kerberos获得服务，（3）Kerberos获得票据许可票据，下列选项中，对这三个阶段的排序正确的是（）", "opts": {"A": "(1)-(2)-(3)", "B": "(3)-(2)-(1)", "C": "(2)-(1)-(3)", "D": "(3)-(1)-(2)"}, "a": "D", "cat": "CISO", "explanation": "课本P301", "cloze": false, "blanks": 1, "fold_point": null}, {"id": 21, "q": "21.在信息安全管理体系的实施过程中，管理者的作用对于信息安全管理体系能否成功实施非常重要，但是以下选项中不属于管理者应有职责的是（）", "opts": {"A": "制定并颁布信息安全方针，为组织的信息安全管理体系建设指明方向并提供总体纲领，明确总体要求", "B": "确保组织的信息安全管理体系目标和相应的计划得以制定，目标应明确、可度量、计划应具体、可实施", "C": "向组织传达满足信息安全的重要收，传达满足信息安全要求、达成信息安全目标、符合信息安全方针、履行法律责任和持续改进的重要性", "D": "建立健全信息安全制度，明确信息安全风险管理作用，实施信息安全风险评估过程，确保信息安全风险评估技术选择合理、计算正确"}, "a": "D", "cat": "CISO", "explanation": "D是具体安全工作，应该是IT部门安全岗位的人做", "cloze": false, "blanks": 1, "fold_point": null}, {"id": 22, "q": "22.以下哪个说法最符合《网络安全法》中关于网络的定义（）", "opts": {"A": "计算机局域网", "B": "包含服务器、交换机等设备的网络空间", "C": "涵盖处理各种信息设备的网络空间", "D": "人与人交往联系的社会网络"}, "a": "C", "cat": "CISO", "explanation": "网络，是指由计算机或者其他信息终端及相关设备组成的按照一定的规则和程序对信息进行收集、存储、传输、交换、处理的系统。不仅仅包括传统IT领域的计算机网络，还包括信息处理设施及其他软硬件，是广义的网络空间，相当于Cyber Space（赛博空间）的概念。 从这个解释看C的答案最接近", "cloze": false, "blanks": 1, "fold_point": null}, {"id": 23, "q": "23.有关系统安全工程-能力成熟度模型（SSE-CMM），错误的理解是（）.", "opts": {"A": "SSE-CMM要求实施组织与其他组织相互作用，如开发方、产品供应商、集成商和咨询服务商等", "B": "SSE-CMM可以使安全工程成为一个确定的、成熟的和可度量的科目", "C": "基于SSE-CMM的工程是独立工程，与软件工程，硬件工程，通信工程等分别规划实施", "D": "SSE-CMM覆盖整个组织的活动，包括管理、组织和工程活动等，而不仅仅是系统安全的工程活动"}, "a": "C", "cat": "CISO", "explanation": "课本P179", "cloze": false, "blanks": 1, "fold_point": null}, {"id": 24, "q": "24.小赵是某大学计算机科学与技术专业的毕业生,在前往一家大型企业应聘时,面试经理要求他给出该企业信息系统访问控制模型的设计思路。从时间和资源消耗的角度如果想要为一个存在大量用户的信息系统实现自主访问控制选项,下列选项中他应该采取的最合适的模型或方法是().", "opts": {"A": "访问控制列表(ACL)", "B": "能力表(CL)", "C": "BLP模型", "D": "Biba模型"}, "a": "A", "cat": "CISO", "explanation": "", "cloze": false, "blanks": 1, "fold_point": null}, {"id": 25, "q": "25.2016年10月21日，美国东部地区发生大规模断网事件，此次事件是由于美国主要DNS服务商Dyn遭遇大规模DDos攻击所致，影响规模惊人，对人们生产生活造成了严重影响，DDos攻击的主要目的是破坏系统的（）.", "opts": {"A": "保密性", "B": "可用性", "C": "不可否认性", "D": "抗抵赖性"}, "a": "B", "cat": "CISO", "explanation": "常识，DDOS破坏可用性", "cloze": false, "blanks": 1, "fold_point": null}, {"id": 26, "q": "26.若一个组织声称自己的ISMS符合ISO／IEC27001或GB／T22080标准要求，其信息安全控制措施通常需要在物理和环境安全方面实施常规控制，物理和环境安全领域包括安全区域和设备安全两个控制目标，安全区域的控制目标是防止对组织场所和信息的未授权物理访问、损坏和干扰，关键或敏感的信息处理设施应放在安全区域内，并受到相应保护，该目标可以通过以下控制措施来实现，不包括哪一项（）", "opts": {"A": "物理安全边界，物理入口控制", "B": "办公室，房间和设施的安全保护，外部和环境威胁的安全防护", "C": "通信安全、合规性", "D": "在安全区域工作，公共访问，交接区安全"}, "a": "C", "cat": "CISO", "explanation": "27002 安全区域 控制目标：防止对组织场所和信息过程设备的未授权物理访问、损坏和干扰。 控制措施：物理安全边界、物理入口控制、办公室、房间和设施的安全保护、外部和环境威胁的安全防护、在安全区域工作、送货和装卸区", "cloze": false, "blanks": 1, "fold_point": null}, {"id": 27, "q": "27.数据在进行传输前，需要由协议找自上而下对数据进行封装，TCP／IP协议中，数据封装的顺序是 （）.", "opts": {"A": "传输层、网络接口层、互联网络层", "B": "传输层、互联网络层、网络接口层", "C": "互联网络层、传输层、网络接口层", "D": "互联网络层、网络接口层、传输层"}, "a": "B", "cat": "CISO", "explanation": "教材", "cloze": false, "blanks": 1, "fold_point": null}, {"id": 28, "q": "28.一个信息管理系统通常会对用户分组并实施访问控制。例如，在一个学校的教务系统中，教师能够的考试成绩，学生只能查看自己的分数，而学校教务部门的管理人员能够对课程信息、学生的选课信息修改。下列选项中，对访问控制的作用的理解错误的是（）.", "opts": {"A": "对经过身份鉴别后的合法用户提供所有服务", "B": "拒绝非法用户的非授权访问请求", "C": "在用户对系统资源提供最大限度共享的基础上，对用户的访问权进行管理", "D": "防止对信息的非授权篡改和滥用"}, "a": "A", "cat": "CISO", "explanation": "常识，安全设计原则中的最小特权原则、权限分离原则就说明不能给用户全部权限 软件安全开发章节", "cloze": false, "blanks": 1, "fold_point": null}, {"id": 29, "q": "29.按照我国信息安全等级保护的有关政策和标准，有些信息系统只需自主定价、自主保护，按照要求向公安机关备案即可，可以不需要上级或主管部门来测评和检查。此类信息系统应属于（）", "opts": {"A": "零级系统", "B": "一级系统", "C": "二级系统", "D": "三级系统"}, "a": "C", "cat": "CISO", "explanation": "第二章P78", "cloze": false, "blanks": 1, "fold_point": null}, {"id": 30, "q": "30.目前，信息系统面临外部攻击者的恶意攻击威胁，从威胁能力和掌握资源分，这些威胁可以按照个人威胁，组织威胁和国家威胁三个层面划分，则下面选项中属于组织威胁的是（）", "opts": {"A": "喜欢恶作剧，实现自我挑战的娱乐型黑客", "B": "实施犯罪，获取非法经济利益目前系统犯罪团伙", "C": "搜索政治、军事、经济等情报信息的情报机构", "D": "巩固战略优势，执行军事任务、进行目标破坏的信息作战部队"}, "a": "B", "cat": "CISO", "explanation": "3.0版本的内容", "cloze": false, "blanks": 1, "fold_point": null}, {"id": 31, "q": "31.从Linux内核2.1版开始，实现了基于权能的特权管理机制，实现了超级用户的特权分割，打破了UNIX/LINUX操作系统中超级用户/普通用户的概念，提高了操作系统的安全性。下列选项中，对特权管理机制的理解错误的是（）.", "opts": {"A": "普通用户及其shell没有任何权能，而超级用户及其shell在系统启动之初拥有全部权能", "B": "系统管理员可以剥夺和恢复超级用户的某些权能", "C": "进程可以放弃自己的某些权能", "D": "当普通用户的某些操作涉及特权操作时，仍然通过setuid实现"}, "a": "B", "cat": "CISO", "explanation": "系统管理员就是超级用户", "cloze": false, "blanks": 1, "fold_point": null}, {"id": 32, "q": "32.小王在学习定量风险评估方法后，决定试着为单位机房计算火灾的风险大小，单位的价值为400万元人民币，暴露系数EF是25%，年度发生率ARO为0.2，那么小王计算的年度预期损失ALE应该是（）.", "opts": {"A": "100万", "B": "400万", "C": "20万", "D": "180万"}, "a": "C", "cat": "CISO", "explanation": "ALE=AV*EF*ARO=400*0.25*0.2=20", "cloze": false, "blanks": 1, "fold_point": null}, {"id": 33, "q": "33.下列关于软件安全开发中的BSI（Build Security In)系列模型说法错误的是（）.", "opts": {"A": "BIS含义是指将安全内建到软件开发过程中，而不是可有可无，更不是游离于软件开发生命周期之外", "B": "软件安全的三根支柱是风险管理、软件安全争触点和安全测试", "C": "软件安全触点是软件开发生命周期中一套轻量级最优工程化方法，它提供了从不同角度保障安全的行为方式", "D": "BSI系列模型强调应该使用工程化的方法来保证软件安全，即在整个软件开发生命周期中都要确保将安全作为软件的一个有机组成部分"}, "a": "B", "cat": "CISO", "explanation": "", "cloze": false, "blanks": 1, "fold_point": null}, {"id": 34, "q": "34.在国家标准GB/T 20274.1 2000《信息安全技术信息系统安全保障评估框架第一部分；简介和一般模型》中，信息系统安全保障模型包含哪几个方面？（）", "opts": {"A": "保障要素，生命周期和运行维护", "B": "保障要素，生命周期和安全特征", "C": "规划组织，生命周期和安全特征", "D": "规划组织，生命周期和运行维护"}, "a": "B", "cat": "CISO", "explanation": "教材P34", "cloze": false, "blanks": 1, "fold_point": null}, {"id": 35, "q": "35.在信息安全风险管理过程中，背景建立是实施工作的第一步，下面哪项是错误的（）.", "opts": {"A": "背景建立的依据是国家，地区行业的相关政策、法律、法规和标准，以及机构的使命，信息系统的业务目标和特性", "B": "背景建立阶段应识别需要保护的资产、面临的威胁以及存在的脆弱性，并分别赋值，同时确认已有的安全措施，形成需要保护的资产清单", "C": "前景建立阶段应调查信息系统的业务目标、业务特性、管理特性和技术特性、形成信息系统的描述报告", "D": "背景建立阶段应分析信息系统的体系结构和关键要素，分析信息系统的安全环境和要求，形成信息系统的安全要求报告"}, "a": "B", "cat": "CISO", "explanation": "B这个选项是风险评估风险要素识别的内容", "cloze": false, "blanks": 1, "fold_point": null}, {"id": 36, "q": "36.GB／T 22080-2008  《信息技术  安全技术  信息安全管理体系 要求》指出，建立信息安全管理体系应参照PDCA模型进行，即信息安全管理体系应包括建立ISMS、实施和运行ISMS、监视和评审ISMS、保持和改进ISMS等过程，并在这些过程中应实施若干活动，请选出以下描述错误的选项（）", "opts": {"A": "“制定ISMS方针”是建产ISMS阶段工作内容", "B": "“实施培训和意识教育计划“是实施和运行ISMS阶段工作内容", "C": "“进行有效性测量”是监视和评审ISMS阶段工作内容", "D": "“实施内部审核”是保护和改进ISMS阶段工作内容"}, "a": "D", "cat": "CISO", "explanation": "", "cloze": false, "blanks": 1, "fold_point": null}, {"id": 37, "q": "37.信息安全组织的管理涉及内部组织和外部各方面两个控制目标，为了实现对组织内部信息安全的有效管理，应该实施常规的控制措施，不包括哪些选项（）.", "opts": {"A": "信息安全的管理承诺，信息安全协调，信息安全职责的分配", "B": "信息处理设施的授权过程，保密性协议，与政府部门的联系", "C": "与特定利益集团的联系，信息安全的独立评审", "D": "与外部各方相关风险的识别、处理外部各方协议中的安全问题"}, "a": "D", "cat": "CISO", "explanation": "管理章节", "cloze": false, "blanks": 1, "fold_point": null}, {"id": 38, "q": "38.与PDR模型相比，P2DR模型则更强调（），即强调系统安全的（），并且以安全检测、（）和自适应填充“安全间隙”为循环来提高（）", "opts": {"A": "漏洞监测：控制和对抗：动态性：网络安全", "B": "动态性：控制和对抗：漏洞监测：网络安全", "C": "控制和对抗：漏洞监测：动态性：网络安全", "D": "控制和对抗：动态性：漏洞监测：网络安全"}, "a": "D", "cat": "CISO", "explanation": "保障章节", "cloze": true, "blanks": 4, "fold_point": 66}, {"id": 39, "q": "39.某银行有5台交换机连接了大量交易机构的网络（如图所示）。在基于以太网的通信中，计算机A需要与计算机B通信，A必须先广播“ARP请求信息”。获取计算机B的物理地址，每到月底时用户发现该银行网络服务速度极其缓慢，银行经调查后发现为了当其中一台交换机收到ARP请求后，会转发给接收端口以外的其他所有端口，ARP请求会被发到网络中的所有客户上，为降低网络的带宽消耗，将广播流限制在固定区域内，可以采用的技术是（）.", "opts": {"A": "VLAN划分", "B": "动态分配地址", "C": "为路由交换设备修改默认令", "D": "设立入侵防御系统"}, "a": "A", "cat": "CISO", "explanation": "VLAN技术的出现，就是为了解决交换机在进行局域网互连时无法限制广播的问题。这种技术可以把一个LAN划分多个逻辑的LAN——VLAN，每个VLAN是一个广播域，不同VLAN间的设备不能直接互通，只能通过路由器等三层设备而互通。这样，广播数据帧被限制在一个VLAN内。 目前，绝大多数以太网交换机都能够支持VLAN。使用VLAN来减小广播域的范围，减少LAN内的广播流量，是高效率、低成本的方案。 路由器的各个接口处于独立的广播域中，终端主机发出的广播帧在接口被终止。所以，在局域网中使用路由器能够隔离广播，减小广播域范围。 但是，路由器的价格比交换机要高，使用路由器提高了局域网的部署成本。另外，大部分中低端路由器使用软件转发，转发性能不高，容易在网络中造成性能瓶颈。所以，在局域网中使用路由器来隔离广播是一个高成本、低性能的方案。 于是我们便选择了另一个方法——VLAN。", "cloze": false, "blanks": 1, "fold_point": null}, {"id": 40, "q": "40.以下关于网络安全设备说法正确的是（）", "opts": {"A": "防火墙既能实现内外网物理隔离，又能实现内外网逻辑隔离", "B": "安全隔离与信息交换系统也称为网闸，需要信息交换时，同一时间可以和两个不同安全级别的网络连接", "C": "入侵检测系统的主要作用是发现并报告系统中未授权或违反安全策略的行为", "D": "虚拟专用网是在公共网络中，利用隧道技术，建立一个永久、安全的通信网络"}, "a": "C", "cat": "CISO", "explanation": "常识", "cloze": false, "blanks": 1, "fold_point": null}, {"id": 41, "q": "41.关于计算机取证描述不正确的是（）.", "opts": {"A": "计算机取证是使用先进的技术和工具，按照标准规程全面地检查计算机系统，以提取和保护有关计算机犯罪的相关证据的活动", "B": "，取证的目的包括：通过证据查找肇事者，通过证据推断受害都损失程度及收集证据提供法律支持", "C": "电子证据是计算机系统运行过程中产生的各种信息记录存储的电子化资料及物品，对于电子证据，取证工作主要围绕两方面进行，证据的获取和证据的保护", "D": "计算机取证的过程可以分为准备、保护、提取、分析和提交5个步骤"}, "a": "C", "cat": "CISO", "explanation": "教材业务连续性章节原文 计算机取证是使用先进的技术和工具，按照标准规程全面地检查计算机系统，以提取和保护有关计算机犯罪的相关证据的活动。取证的目的包括：通过证据查找肇事者、通过证据推断犯罪过程、通过证据判断受害者损失程度及收集证据提供法律支持。电子证据是计算机系统运行过程中产生的各种信息记录及存储的电子化资料及物品。对于电子证据，取证工作主要围绕两方面进行：证据的获取和证据的分析。计算机取证的过程可以分为准备、保护、 提取、分析和提交5个步骤。", "cloze": false, "blanks": 1, "fold_point": null}, {"id": 42, "q": "42.若一个组织声称自己的ISMS符合ISO／IEC 27001成GB／T22080标准要求，其信息安全控制措施通常需要在符合性方面实施常规控制，符合性常规控制这一领域不包括以下哪项控制目标（）.", "opts": {"A": "符合法律要求", "B": "符合安全策略和标准以及技术符合性", "C": "信息系统审核考虑", "D": "访问控制的业务要求，用户访问管理"}, "a": "D", "cat": "CISO", "explanation": "管理章节", "cloze": false, "blanks": 1, "fold_point": null}, {"id": 43, "q": "43.关于信息安全应急响应管理过程描述不正确的是（）.", "opts": {"A": "基于应急响应工作的特点和事件的不规则性，事先制定出事件应急响应方法和过程，有助于一个组织在事件发生时阻止混乱的发生或是在混乱状态中迅速恢复控制，将损失和负面影响降至最低", "B": "应急响应方法和过程并不是唯一的", "C": "一种被广为接受的应急响应方法是将应急响应管理过程分为准备、检测、遏制、恢复和跟踪总结6个阶段", "D": "一种被广为接受的应急响应方法是将应急管理过程分为准备、检测、遏制、根除、恢复和跟踪总结6个阶段，这6个阶段的响应方法一定能确保事件处理的成功"}, "a": "D", "cat": "CISO", "explanation": "D的“这6个阶段的响应方法一定能确保事件处理的成功”说的太绝对", "cloze": false, "blanks": 1, "fold_point": null}, {"id": 44, "q": "44.你是单位主管，由于微软刚发布了数个系统漏洞补丁，安全运维人员给出了针对此纰漏修补的四个建设方案，请选择其中一个最优方案执行（）", "opts": {"A": "由于本次发布的数个漏洞都属于高危漏洞，为了避免安全风险，应对单位所有的服务器和客户端尽快安装补丁", "B": "本次发布的漏洞目前尚未出现利用工具，因此不会对系统产生实质性危害，所以可先不做处理", "C": "对于重要的服务，应在测试环境中安装并确认补丁兼容性问题后在正式生产环境中部署", "D": "对于服务器等重要设备，立即使用系统更新功能安装这些补丁，用户终端计算机由于没有重要数据，由终端计算机升级"}, "a": "C", "cat": "CISO", "explanation": "打补丁主要步骤 评估补丁（评估补丁是否适用于系统，比如WINDOWS没有安装某个功能，那么用于修补这个功能的补丁就不需要，较为重要），你用360打补丁，你会发现360有很多补丁不建议你安装 测试补丁（测试补丁是为了确定补丁不会带来其他副作用，最糟糕的情况就是使用补丁以后系统无法启动，较为关键） 批准补丁（确定补丁安全性后就会批准补丁部署，常与变更管理联动） 部署补丁（经过测试和批准，管理员就可以部署补丁，部署的方式有人工、自动两种，很多组织使用自动化方法部署补丁，例如自动化方法可以是第三方产品或有厂商提供的） 验证补丁（补丁部署以后，管理员定期测试和审计系统，以确保系统补丁任然任然有效，伴随跟进的过程）", "cloze": false, "blanks": 1, "fold_point": null}, {"id": 45, "q": "45.王工是某单位的系统管理员，他在某次参加单位组织的风险管理工作时，发现当前案例中共有两个重要资产；资产A1和资产A2；其中资产A1面临两个主要威胁：威胁T1和威胁T2；而资产A2面临一个主要威胁：威胁T3；威胁T1可以利用的资产A1参在的两个脆弱性：脆弱性V1和脆弱性V2；威胁T2可以利用的资产AI存在的三个脆弱性：脆弱性V3、脆弱性V4和脆弱性V5；可以利用的资产A2存在的两个脆弱性：脆弱性V6和脆弱性V7。根据上述条件，请问：使用相乘法时，应该为资产A1计算几个风险值（）.", "opts": {"A": "2", "B": "3", "C": "5", "D": "6"}, "a": "C", "cat": "CISO", "explanation": "", "cloze": false, "blanks": 1, "fold_point": null}, {"id": 46, "q": "46.小牛在对某公司的信息系统进行风险评估后，因考虑到该业务系统中部分涉及金融交易的功能模块风险太高，他建议该公司以放弃这个功能模块的方式来处理风险，请问这种风险处置的方法是（）", "opts": {"A": "降低风险", "B": "规避风险", "C": "放弃风险", "D": "转移风险"}, "a": "B", "cat": "CISO", "explanation": "管理章节 风险规避 通常在风险的损失无法接受，又难以通过控制措施减低风险的情况下才使用规避风险这种风险处置方法 变更、延缓或停止某种服务或业务功能 该措施只能在与组织目标、法律法规符合性以及利益相关方的期望不发生冲突时考虑", "cloze": false, "blanks": 1, "fold_point": null}, {"id": 47, "q": "47.某贸易公司的OA系统由于存在系统漏洞，被攻击者传上了木马病毒并删除了系统中的数据，由于系统备份是每周六进行一次，事件发生时间为周三，因此导致该公司三个工作日的数据丢失并使得OA系统在随后两天内无法访问，影响到了与公司有业务往来部分公司业务。在事故处理报告中，根据GB/z20986-2007《信息安全事件分级分类指南》，该事件的准确分类和定级应该是（）.", "opts": {"A": "有害程序事件 特别重大事件（I级）", "B": "信息破坏事件 重大事件（II级）", "C": "有害程序事件 较大事件（III级）", "D": "信息破坏事件 一般事件（IV级）"}, "a": "D", "cat": "CISO", "explanation": "1000万一下的损失都是一般事件", "cloze": false, "blanks": 1, "fold_point": null}, {"id": 48, "q": "48.信息系统安全保障是在信息系统的整个生命周期中，通过对信息系统分析，制定并执行相应的安全保障策略，从技术、管理、工程和人员等方面提出安全保障要求，确保信息系统的保密性、完整性和可用性，降低安全风险到可接受的程度，从而保障系统实现组织机构的业务，信息系统保障工作如图所示。从该图不难看出，信息系统是（）。信息系统安全风险的因素主要有（）", "opts": {"A": "用于采集、处理、存储、传输、分发和部署信息的整个基础设施、组织结构、人员和组件的总和：信息系统自身存在漏洞。", "B": "用于采集、处理、存储、传输、分发和部署信息的整个基础设施、组织结构、人员和组件的总和：信息系统来自系统外部的威胁和人为操作引入的安全风险", "C": "用于采集、处理整个基础设施、组织结构、人员和组件的总和；信息系统自身存在漏洞、来自系统外部的威胁和人为操作引入的安全风险", "D": "用于采集、处理、存储、传输、分发和部署信息的整个基础设施、组织结构、人员和组件的总和：信息系统自身存在的漏洞和来自系统外部的威胁"}, "a": "D", "cat": "CISO", "explanation": "常识，风险确实来自信息系统自身存在的漏洞和来自系统外部的威胁", "cloze": true, "blanks": 2, "fold_point": 169}, {"id": 49, "q": "49.操作系统用于管理计算机资源，控制整个系统运行，是计算机软件的基础，操作系统安全是计算、网络及信息系统安全的基础，一般操作系统都提供了相应的安全配置接口，小王新买了一台计算机，开机后首先对带的Windows 操作系统进行配置，他的主要操作有：（1）关闭不必要的服务和端口；（2）在“本地安全策略”中配置账号策略、本地策略、公钥策略和IP安全策略：（3）备份敏感文件，禁止建立空连接，下栽最新补丁：（4）关闭审核策略，开启口令策略，开启口令策略，开启账户策略，这些操作中错误的是（）", "opts": {"A": "操作（1），应该关闭不必要的服务和所有端口", "B": "操作（2），在“本地安全策略”中不应该配置公钥策略，而应该配置私钥策略", "C": "操作（3），备份敏感文件会导致这些文件遭到窃取的几率增加", "D": "操作（4），应该开启审核策略"}, "a": "D", "cat": "CISO", "explanation": "日志、审核策略是必须开的", "cloze": false, "blanks": 1, "fold_point": null}, {"id": 50, "q": "50.CC标准是目前系统安全认证方面最权威的标准，以下哪一项没有体现CC标准的先进性（）", "opts": {"A": "结构的开放性，即功能和保证要求都可以具体的“保护轮廓”和“安全目标”中进一步细化和扩展", "B": "表达方式的通用性，即给出通用的表达方式", "C": "独决性，它强调将安全的功能和保证分离", "D": "实用性，将CC的安全性要求具体应用到IT产品的开发、生产、测试和评估过程中"}, "a": "C", "cat": "CISO", "explanation": "ABC选项PPT都有对应内容，D是编的", "cloze": false, "blanks": 1, "fold_point": null}, {"id": 51, "q": "51.即使最好用的安全产品也存在（）。结果，在任何的系统中敌手最终都能够找出一个被开发出的漏洞，一种有效的对策是在敌手和安的目标之间配备多种（），每一种机制都应包括（）两种手段。", "opts": {"A": "安全机制：安全缺陷：保护和检测", "B": "安全缺陷：安全机制：保护和检测", "C": "安全缺陷：保护和检测：安全机制", "D": "安全缺陷：安全机制：外边和内部"}, "a": "B", "cat": "CISO", "explanation": "教材P30，不是完全适合的解释，但是意会", "cloze": true, "blanks": 3, "fold_point": 77}, {"id": 52, "q": "52.信息系统安全保障评估概念和关系如图所示，信息系统安全保障评估，就是在信息系统所处运行环境中对信息系统安全保障的具体工作和活动进行客观的评估，通过信息系统安全保障评估所搜集的（），向信息系统的所有相关方提供信息系统的（）能够实现其安全保障策略，能够将其所面临的风险降低到其可接受的程度的主观信心，信息系统安全保障评估的评估对象是（），信息系统不仅包含仅讨论术的信息技术系统，还包括同信息系统所处的运行环境相关的人和管理等领域，信息系统安全保障是一个动态持续的过程，涉及信息系统整个（），因此信息系统安全保障的评估也应该提供一种（）的信心。", "opts": {"A": "安全保障工作；客观证据；信息系统；生命周期；动态持续", "B": "客观证据；安全保障工作；信息系统；生命周期；动态持续", "C": "客观证据；安全保障工作；生命周期；信息系统；动态持续", "D": "客观证据：安全保障工作：动态持续：信息系统：生命周期"}, "a": "B", "cat": "CISO", "explanation": "课本P32", "cloze": true, "blanks": 5, "fold_point": 150}, {"id": 53, "q": "53.部署互联网协议安全虚拟专用网（Internet protocol Security Virtual Private Network,IPsecVPN）时,以下说法正确的是:（）", "opts": {"A": "配置MD5安全算法可以提供可靠的数据加密", "B": "配置AES算法可以提供可靠的数据完整性验证", "C": "部署IPsec VPN网络时,需要考虑IP地址的规划,尽量在分支节点使用可以聚合的IP地址段,来减少IPsec安全关联（Security Authentication,SA ）资源的消耗", "D": "报文验证头协议（Authentication Header,AH）可以提供数据机密性"}, "a": "C", "cat": "CISO", "explanation": "教材P337", "cloze": false, "blanks": 1, "fold_point": null}, {"id": 54, "q": "54.不同的信息安全风险评估方法可能得到不同的风险评估结果，所以组织机构应当根据自的实际情况选择适当的风险评估方法。下面的描述中错误的是（）.", "opts": {"A": "定量风险分析试图从财务数字上对安全风险进行评估，得出可以量化的风险分析结果，以度量风险的可能性和缺失量", "B": "定量风险分析相比定性风险分析能得到准确的数值，所以在实际工作中应使用定量风", "C": "定性风险分析过程中，往往需要凭借分析者的经验和直接进行，所以分析结果和风险评估团队的素质、经验和知识技能密切相关险分析，而不应选择定性风险分析", "D": "定性风险分析更具主观性，而定量风险分析更具客观性"}, "a": "B", "cat": "CISO", "explanation": "", "cloze": false, "blanks": 1, "fold_point": null}, {"id": 55, "q": "55.我国标准《信息安全风险管理指南》（GB/Z24364）给出了信息安全风险管理的内容和过程，可以用下图来表示。图中空白处应该填写（）", "opts": {"A": "风险计算", "B": "风险评价", "C": "风险预测", "D": "风险处理"}, "a": "D", "cat": "CISO", "explanation": "评估章节", "cloze": false, "blanks": 1, "fold_point": null}, {"id": 56, "q": "56.某电子商务网站在开发设计时，使用了威胁建模方法来分析电子商务网站所面临的威胁。STRIDE是微软SDL中提出的威胁建模方法，将威胁分为六类，为每一类威胁提供了标准的消减措施，Spoofing是STRIDE中欺骗类的威胁，以下威胁中哪个可以归入此类威胁？（）", "opts": {"A": "网站竞争对手可能雇佣攻击者实施DDos攻击，降低网站访问速度", "B": "网站使用http协议进行浏览等操作，未对数据进行加密，可能导致用户传输信息泄漏，例如购买的商品金额等", "C": "网站使用http协议进行浏览等操作，无法确认数据与用户发出的是否一致，可能数据被中途篡改", "D": "网站使用用户名、密码进行登录验证，攻击者可能会利用弱口令或其他方式获得用户密码，以该用户身份登录修改用户订单等信息"}, "a": "D", "cat": "CISO", "explanation": "Spoofing (假冒)木马伪装成ntdll.dll，钓鱼网站伪装成microsoft.com", "cloze": false, "blanks": 1, "fold_point": null}, {"id": 57, "q": "57.老王是一名企业信息化负责人，由于员工在浏览网页时总导致病毒感染系统，为了解决这一问题，要求信息安全员给出解决措施，信息安全员给出了四条措施建议，老王根据多年的信息安全管理经验，认为其中一条不太适合推广，你认为是哪条措施（）.", "opts": {"A": "采购防病毒的网关并部署在企业互联网出口中，实现对所有浏览网页进行检测，阻止网页中的病毒检测和查杀能力", "B": "采购并统一部署企业防病毒软件，信息化管理部门统一进行病毒库升级，确保每台计算机都具备有效的病毒检测和查杀能力", "C": "制定制度禁止使用微软的IE浏览器上网，统一要求使用Chrome浏览器", "D": "组织对员工进行一次上网行为安全培训，提高企业员工在互联网浏览时的安全意识"}, "a": "C", "cat": "CISO", "explanation": "Chrone浏览器不会比IE更安全，主要看配置和使用习惯", "cloze": false, "blanks": 1, "fold_point": null}, {"id": 58, "q": "58.以下关于信息安全工程说法正确的是（）.", "opts": {"A": "信息化建设中系统功能的实现是最重要的", "B": "信息化建设可以先实施系统，而后对系统进行安全加固", "C": "信息化建设中在规划阶段合理规划信息安全，在建设阶段要同步实施信息安全建设", "D": "信息化建设没有必要涉及信息安全建设"}, "a": "C", "cat": "CISO", "explanation": "", "cloze": false, "blanks": 1, "fold_point": null}, {"id": 59, "q": "59.北京某公司利用SSE-CMM对其自身工程队伍能力进行自我改善，其理解正确的是（）", "opts": {"A": "系统安全工程能力成熟度模型SSE-CMM定义了6个能力级别，当工程队伍不能执行一个过程域的基本实践时，该过程的过程能力是0级", "B": "达到SSE-CMM最高级以后，工程队伍执行同一个过程，每次执行的结果质量必须相同", "C": "系统安全工程能力成熟度模型SSE-CMM定义了3个风险过程：评价威胁，评价脆弱性，评价影响", "D": "SSE-CMM强调系统安全工程与其他工程学科的区别性和独立性"}, "a": "A", "cat": "CISO", "explanation": "", "cloze": false, "blanks": 1, "fold_point": null}, {"id": 60, "q": "60.某IT公司针对信息安全事件已经建立了完善的预案，在年度企业信息安全总结会上，信息安全管理员对今年应急预案工作做出了四个总结工作是错误，作为企业的CSO,请你指出存在问题的是哪个总结？（）.", "opts": {"A": "公司制定的应急演练流程包括应急事件通报、确定应急事件优先级应急响应启动实施、应急响应时间后期运维、更新现在应急预案5个阶段，流程完善可用", "B": "公司应急预案包括了基本环境类、业务系统、安全事件类、安全事件类和其他类，基本覆盖了各类应急事件类型", "C": "公司应急预案对事件分裂依据GB/Z20986-2007《信息安全技术信息安全事件分类分级指南》，分为7个基本类别，预案符合国家相关标准", "D": "公司成立了信息安全应急响应组织，该组织由业务和技术人员组织，划分成应急响应领导小组、实施小组和日常运营小组"}, "a": "D", "cat": "CISO", "explanation": "", "cloze": false, "blanks": 1, "fold_point": null}, {"id": 61, "q": "61.访问控制的实施一般包括两个步骤，首先要鉴别主体的合法身份，接着根据当前系统的访问控制规则授予相应用户的访问权限。在此过程中，涉及主体、客体、访问控制实施部件和访问控制决策部件之间的交互。下图所示的访问控制实施步骤中，标有数字的方框代表了主体、客体、访问控制实施部件和访问控制决策部件。下列选项中，标有数字1、2、3、4的方框分别对应的实体或部件正确的是（）", "opts": {"A": "主体、访问控制决策、客体、访问控制实施", "B": "主体、访问控制实施、客体、访问控制决策", "C": "客体、访问控制决策、主体、访问控制实施", "D": "客体、访问控制实施、主体、访问控制决策"}, "a": "B", "cat": "CISO", "explanation": "安全支撑技术章节", "cloze": false, "blanks": 1, "fold_point": null}, {"id": 62, "q": "62.有关能力成熟度模型（CMM）错误的理解是（）.", "opts": {"A": "CMM的基本思想是，因为问题是由技术落后引起的，所以新技术的运用会在一定程度上提高质量、生产率和利润率", "B": "CMM的思想来源于项目管理和质量管理", "C": "CMM是一种衡量工程实施能力的方法，是一种面向工程过程的方法", "D": "CMM是建立在统计过程控制理论基础上的，它基于这样一个假设，即“生产过程的高质量和在过程中组织实施的成熟性可以低成本地生产出高质量产品"}, "a": "A", "cat": "CISO", "explanation": "教材P178,A是编的", "cloze": false, "blanks": 1, "fold_point": null}, {"id": 63, "q": "63.以下有关系统工程说法错误的是（）.", "opts": {"A": "系统工程不属于基本理论，也不属于技术基础，它研究的重点是方法论", "B": "系统工程的目的是实现总体效果最优化，即从复杂问题总体入手，认为总体大于各部分之和，各部分虽然存在不足，但总体可以优化", "C": "系统工程只需要使用定量分析的方法，通过建立实际对象的数学模型，应用合适的优化算法对模型求解解决实际问题", "D": "霍尔三维结构将系统工程整个活动过程分为前后紧密衔接的7个阶段和7个步骤"}, "a": "C", "cat": "CISO", "explanation": "教材P175,ABD都有，C是编的", "cloze": false, "blanks": 1, "fold_point": null}, {"id": 64, "q": "64.我国等级保护政策发展的正确顺序是（）", "opts": {"A": "①②③④⑤", "B": "②③①⑤④", "C": "②⑤①③④", "D": "①②④③⑤"}, "a": "C", "cat": "CISO", "explanation": "教材P60", "cloze": false, "blanks": 1, "fold_point": null}, {"id": 65, "q": "65.社会工程学定位在计算机信息安全工作链的一个最脆弱的环节，即“人”这个环节上。这些社会工程黑客在某黑客大会上成功攻入世界五百强公司，其中一名自称是为CSO杂志做安全调查。半个小时内，攻击者选择了在公司工作两个月安全工程部门的合约雇员，在询问关于工作满意度及食堂食物质量问题后，雇员开始透露其他信息。包括：操作系统、服务包、杀毒软件、电子邮件及浏览器。为对抗此类信息收集和分析，公司需要做的是（）", "opts": {"A": "通过信息安全培训，使相关信息发布人员了解信息收集风险，发布信息采取最小原则", "B": "减少系统对外服务的端口数量，修改服务旗标", "C": "关闭不必要的服务，部署防火墙、IDS等措施", "D": "系统安全管理员使用漏洞扫描软件对系统进行安全审计"}, "a": "A", "cat": "CISO", "explanation": "第五章P223", "cloze": false, "blanks": 1, "fold_point": null}, {"id": 66, "q": "66.在某次信息安全应急响应过程中，小王正在实施如下措施，消除或阻断攻击派，找到并消除系统的脆弱性／漏洞、修改安全策略、加强防范措施、格式化被感染恶意程序的介质，请问，按照PDCERF应急响应方法，这些工作应处于以下哪个阶段（）", "opts": {"A": "准备阶段", "B": "检测阶段", "C": "遏制阶段", "D": "根除阶段"}, "a": "D", "cat": "CISO", "explanation": "教材P153", "cloze": false, "blanks": 1, "fold_point": null}, {"id": 67, "q": "67.随着信息安全涉及的范围越来越广，各个组织对信息安全管理的需求越来越迫切，越来越多的组织开始尝试使用参考ISO27001介绍的ISMS来实施信息安全管理体系，提高组织的信息安全管理能力。关于ISMS，下面描述错误的是（）.", "opts": {"A": "在组织中，应由信息技术责任部门（如信息中心）制定并颁布信息安全方针，为组织的ISMS建设指明方向提供总体纲领，明确总体要求", "B": "组织的管理层应确保ISMS目标和相对应的计划得以制定，信息安全管理目标应明确、可度量，风险管理计划具体，具备可行性", "C": "组织的信息安全目标、信息安全方针和要求应传达到全组织范围内，应包括群体员工，同时，也应传达到客体合作伙伴和供应商等外部各方", "D": "组织的管理层应全面了解组织所面临的信息安全风险，决定风险可接受级别和风险可接受准测，并确认接残余风险"}, "a": "A", "cat": "CISO", "explanation": "管理章节", "cloze": false, "blanks": 1, "fold_point": null}, {"id": 68, "q": "68.若一个组织声称自己的ISMS符合ISO/IBC 27001或GB/T22080标准要求，其信息安全控制措施通常在以下方面实施常规控制，以下哪个选项的内容不属于常规控制措施的范围（）", "opts": {"A": "信息安全方针、信息安全组织、资产管理", "B": "人力资源安全、物理和环境安全、通信和操作管理", "C": "安全采购、开发与维护、合规性", "D": "安全事件管理、供应商关系、业务安全性审计"}, "a": "D", "cat": "CISO", "explanation": "在教材P103这个图里没有业务安全性审计", "cloze": false, "blanks": 1, "fold_point": null}, {"id": 69, "q": "69.小王在学习信息安全管理体系相关知识之后，对于建立信息安全管理体系，自己总结了下面四条要求，其中理解不正确的是( ).", "opts": {"A": "信息安全管理体系的建立应参照国际国内有关标准实施，因为这些标准是标准化组织在总结研究了很多实际的或潜在的问题后，制定的能共同的和重复使用的规则", "B": "信息安全管理体系应强调全过程和动态控制的思想，因为安全问题是动态的，系统所处的安全环境也不会一成不变，不可能建设永远安全的系统", "C": "信息安全管理体系的建立应基于一次风险评估彻底解决所有安个问题的思想，因为这是国家有关信息安全的法律和法规方面的要求，这体现以预防控制为主的思想", "D": "信息安全管理体系应体现科学性和全面性的特点，因为要对信息安全管理涉及的方方面面实施较为均衡的管理，避免遗漏某些方面而导致组织的整体信息安全水平过低"}, "a": "C", "cat": "CISO", "explanation": "风险不可能一次解决", "cloze": false, "blanks": 0, "fold_point": null}, {"id": 70, "q": "70.某单位在一次信息安全风险管理活动中，风险评估报告提出服务器A的FTP服务存在高风险漏洞，随后该单位在风险处理时选择了关闭FTP服务的处理措施，请问该措施属于哪种风险处理方式（）.", "opts": {"A": "风险降低", "B": "风险规避", "C": "风险转移", "D": "风险接受"}, "a": "B", "cat": "CISO", "explanation": "管理章节 风险规避 通常在风险的损失无法接受，又难以通过控制措施减低风险的情况下才使用规避风险这种风险处置方法 变更、延缓或停止某种服务或业务功能 该措施只能在与组织目标、法律法规符合性以及利益相关方的期望不发生冲突时考虑", "cloze": false, "blanks": 1, "fold_point": null}, {"id": 71, "q": "71.以下关于灾难恢复和数据备份的理解，说法正确的是（）.", "opts": {"A": "增量备份是备份从上次完全备份后更新的全部数据文件", "B": "依据具备的灾难恢复资源程度的不同，灾难恢复能力分为7个等级", "C": "数据备份按数据类型划分为系统数据备份和用户数据备份", "D": "使用差分备份，数据恢复时只需最后一次的标准备份与差分备份，如果每天都有大量数据变化，差分备份工作非常费时"}, "a": "C", "cat": "CISO", "explanation": "课本P163 B的说法是不对，AD明显错误 C是网络题库的答案，说法正确", "cloze": false, "blanks": 1, "fold_point": null}, {"id": 72, "q": "72.小华在某电子商务公司工作，某天他在查看信息系统设计文档时，发现其中标注该信息系统的RPO（恢复点目标）指标为3小时，请问这意味着（）.", "opts": {"A": "该信息系统发生重大信息安全事件后，工作人员应在3小时内到位，完成问题定位和应急处理工作", "B": "该信息系统发生重大信息安全事件后，工作人员应在3小时内完成应急处理工作，并恢复对外运行", "C": "若该信息系统发生重大信息安全事件，工作人员在完成处置和灾难恢复工作后，系统至少提供3小时的紧急业务服务能力", "D": "若该信息系统发生重大信息安全事件，工作人员哎完成处置和灾难恢复工作后，系统多能丢失3小时的业务数据"}, "a": "D", "cat": "CISO", "explanation": "", "cloze": false, "blanks": 1, "fold_point": null}, {"id": 73, "q": "73.以下哪项制度或标准作为我国的一项基础制度加以推行，并且有一定强制性，其实施的主要目的是有效地提高我国信息和信息系统安全建设的整体水平，重点保障基础信息网络和重要信息系统的安全。（）.", "opts": {"A": "信息安全管理体系（ISMS）", "B": "信息安全等级保护", "C": "NISI SP800", "D": "ISO 270000系列"}, "a": "B", "cat": "CISO", "explanation": "ISMS就是27000，NISI SP800美国的，这些不是强制的，等保肯定有强制性", "cloze": false, "blanks": 1, "fold_point": null}, {"id": 74, "q": "74.若一个组织声称自己的ISMS符合ISO/IBC 27001或GB/T22080标准要求，其信息安全控制措施通常在以下方面实施常规控制，资产管理包含对资产负责和信息分类两个控制目标，对资产负责的控制目标是实现和保护对组织资产的适当保护，这一控制目标的实现由以下控制措施的落实来保障，不包括哪一项（）.", "opts": {"A": "资产清单", "B": "资产负责人", "C": "资产的可接受使用", "D": "分类指南、信息的标记和处理"}, "a": "D", "cat": "CISO", "explanation": "管理章节", "cloze": false, "blanks": 1, "fold_point": null}, {"id": 75, "q": "75.有关危害国家秘密安全的行为包括（）", "opts": {"A": "严重违反保密规定行为、定密不当行为、公共信息网络运营商及服务商不履行保密义务的行为、保密行政管理部门的工作人员的违法行为", "B": "严重违反保密规定行为、公共信息网络运营商及服务商不履行保密义务的行为、保密行政管理部门的工作人员的违法行为，但不包括定密不当行为", "C": "严重违反保密规定行为、定密不当行为、保密行政管理部门的工作人员的违法行为，但不包括公共信息网络运营商及服务商不履行保密义务的行为", "D": "严重违反保密规定行为、定密不当行为、公共信息网络运营商及服务商不履行保密义务的行为，但不包括保密行政管理部门的工作人员的违法行为"}, "a": "A", "cat": "CISO", "explanation": "保密法没有例外", "cloze": false, "blanks": 1, "fold_point": null}, {"id": 76, "q": "76.金女士经常通过计算机在互联网上购物，从安全角度看，下面哪项是不好的操作习惯（）.", "opts": {"A": "使用专用上网购物用计算机，安装好软件后不要对该计算机上的系统软件、应用软件进行升级", "B": "为计算机安装具有良好声誉的安全防范软件，包括病毒查杀、安安全检查和安全加固方面的软件", "C": "在IE的配置中，设置只能下载和安装经过签名的、安全的ActiveX控件", "D": "在使用网络浏览器时，设置不在计算机中保留网络历史记录和表单数据"}, "a": "A", "cat": "CISO", "explanation": "常识软件要及时升级", "cloze": false, "blanks": 1, "fold_point": null}, {"id": 77, "q": "77.以下关于Windows操作系统身份标识与鉴别，说法不正确的是（）.", "opts": {"A": "本地安全授权机构（LSA）生成用户帐户在该系统内唯一的安全标识符（SID）", "B": "用户对鉴别信息的操作，如更改密码等都通过一个以Administrator权限运行的服务“Security Accounts Manager”来实现", "C": "Windows 操作系统远程登录经历了SMB鉴别机制、LM鉴别机制、Kerberos鉴别体系等阶段", "D": "完整的安全标识符（SID）包括用户和组的安全描述，48比特的身份特权、修订版本和可变的验证值"}, "a": "B", "cat": "CISO", "explanation": "“Security Accounts Manager”是注册表的核心组成部分，Windows\\system\\config\\SAM，其中一个主要作用就是存储用户帐户配置信息。", "cloze": false, "blanks": 1, "fold_point": null}, {"id": 78, "q": "78.某网络安全公司基于网络的实时入侵检测技术，动态监测来自于外部网络和内部网络的所有访问行为。到来自内外网络针对或通过防火墙的攻击行为，会及时响应，并通知防火墙实时阻断攻击源，从而进一步提高系统的抗攻击能力，更有效地保护了网络资源，提高了防御体系级别，但入侵检测技术不能实现以下哪种功能（）.", "opts": {"A": "检测并分析用户和系统的活动", "B": "核查系统的配置漏洞，评估系统关键资源和数据文件的完整性", "C": "防止IP地址欺骗", "D": "识别违反安全策略的用户活动"}, "a": "C", "cat": "CISO", "explanation": "常识，IPS无法防止IP地址欺骗", "cloze": false, "blanks": 1, "fold_point": null}, {"id": 79, "q": "79.若一个组织声称自己的ISMS符合ISO／IEC 27001或GB／T22080标准要求，其信息安全控制措施通常需要在人力资源安全方面实施常规控制，人力资源安全划分为三个阶段，不包括哪一项（）.", "opts": {"A": "任用之前", "B": "任用中", "C": "任用终止或变化", "D": "任用公示"}, "a": "D", "cat": "CISO", "explanation": "教材P106、107、108页，只有ABC，没有D这个说法", "cloze": false, "blanks": 1, "fold_point": null}, {"id": 80, "q": "80.应急响应是信息安全事件管理的重要内容之一，关于应急响应工作，下面描述错误的是（）.", "opts": {"A": "信息安全应急响应，通常是指一个组织为了应对各种安全意外事件的发生所采取的防范措施，既包括预防性措施，也包括事件发生后的应对措施", "B": "应急响应工作有起鲜明的特点；具有高技术复杂性与专业性、强突发性、对知识经验的高依赖性，以及需要广泛的协调与合作", "C": "应急响应是组织在处置应对突发/重大信息安全事件的工作，其主要包括两部分工作；安全事件发生时正确发挥，事件发生后全面总结", "D": "应急响应工作的起源和相关机构的成立和1988年11月发生的莫里斯蠕虫病毒事件重视安全事件的应急处置和整体协调的重要性"}, "a": "C", "cat": "CISO", "explanation": "", "cloze": false, "blanks": 1, "fold_point": null}, {"id": 81, "q": "81.关于《网络安全法》域外适用效力的理解，以下哪项是错误的（）", "opts": {"A": "当前对于域外的网攻击，我国只能通过向来源国采取抗议", "B": "对于来自境外的网络安全成胁我国可以组织技术力量进行监测、防御和处置", "C": "对于来自境外的违法信息我国可以加以阻断传播", "D": "对于米自境外的网络攻击我国可以追究其法律责任"}, "a": "A", "cat": "CISO", "explanation": "《网络安全法》域外适用效力就是可以对境外人员追究法律责任", "cloze": false, "blanks": 1, "fold_point": null}, {"id": 82, "q": "82.随机进程名称是恶意代码迷惑管理员和系统安全检查人员的技术手段之一，以下对于随机进程名技术，描述正确的是（）", "opts": {"A": "随机进程名技术虽然每次进程都是随机的，但是只要找到了进程名称，就找到了恶意代码程序本身", "B": "恶意代码生成随机进程名称的目的是使进程名称不固定，因为杀毒软件是按照进程名称进行病毒进程查杀", "C": "恶意代码使用随机进程名是通过生成特定格式的进程名称，使进程管理器中看不到恶意代码的进程", "D": "随机进程名技术每次启动时随机生成恶意代码进程名称，通过不固定的进程名称使自己不容易被发现真实的恶意代码程序名称"}, "a": "D", "cat": "CISO", "explanation": "常识，移植题目", "cloze": false, "blanks": 1, "fold_point": null}, {"id": 83, "q": "83.某单位根据业务需要准备立项开发一个业务软件，对于软件开发安全投入经费研讨时开发部门和信息中心就发生了分歧，开发部门认为开发阶段无需投入，软件开发完成后发现问题后在针对性的解决，比前期安全投入要成本更低，信息中心则认为应在软件安全开发阶段投入，后期解决代价太大，双方争执不下，作为信息安全专家，请选择对软件开发安全投入的准确说法（）.", "opts": {"A": "双方的说法都正确，需要根据具体情况分析是开发阶段投入解决问题还是在上线后再解决问题费用更低", "B": "双方的说法都错误，软件安全问题在任何时候投入解决都可以，只要是一样的问题，解决的代价相同", "C": "信息中心的考虑是正确的，在软件立项投入解决软件安全问题，总体经费投入比软件运行后的费用要低", "D": "软件开发部门的说法是正确的，因为软件发现问题后更清楚问题所在，安排人员进行代码修订更简单，因此费用更低"}, "a": "C", "cat": "CISO", "explanation": "工程章节", "cloze": false, "blanks": 1, "fold_point": null}, {"id": 84, "q": "84.(）第二十三条规定存储、处理国家秘密的计算机信息系统（以下简称涉密信息系统）按照（）实行分级保护，（）应当按照国家保密标准配备保密设施、设备、（）设备应当与涉密信息系统同步规划、同步建设、同步运行9三同步），涉密信息系统应当按照规定，经（）后，方可投入使用。", "opts": {"A": "《保密法》；涉密程度；涉密信息系统保密设施；检查合格", "B": "《国家保密法》；涉密程度；涉密系统；保密设施；检查合格", "C": "《国家保密法》；涉密程度；涉密系统；保密设施；检查合格", "D": "《安全保密法》；涉密程度；涉密信息系统；保密设施；检查合格"}, "a": "A", "cat": "CISO", "explanation": "教材P57", "cloze": true, "blanks": 4, "fold_point": 104}, {"id": 85, "q": "85.小王是某大学计算机科学与技术专业的学生，最近因为生病缺席了几堂信息安全课程，这几次课的内容是自主访问控制与强制访问控制，为了赶上课程，他向同班的小李借来课堂笔记，进行自学。而小李在听课时由于经常走神，所以笔记会出现一些错误。下列选项是小李笔记中关于强制访问控制模型的内容，其中出现错误的选项是（）.", "opts": {"A": "强制访问控制是指主体和客体都有一个固定的安全属性，系统用该安全属性来决定一个主体是否可以访问某个客体", "B": "安全属性是强制性的规定，它由安全管理员或操作系统根据限定的规则确定，不能随意\\篡改", "C": "系统通过比较客体和主体的安全属性来决定主体是否可以访问客体", "D": "它是一种对单个用户执行访问控制的过程控制措施"}, "a": "D", "cat": "CISO", "explanation": "面对单个用户不需要访问控制", "cloze": false, "blanks": 1, "fold_point": null}, {"id": 86, "q": "86.私有IP地址是一段保留的IP地址，只使用在局域网中，无法在Internet上使用，关于私有地址，下面描述正确的是（）.", "opts": {"A": "A类和B类地址中没有私有地址，C类地址中可以设置私有地址", "B": "A类地址中没有私有地址，B类和C类地址中可以设置私有地址", "C": "A类、B类和C类地址中都有可以设置私有地址", "D": "A类、B类和C类地址中都没有私有地址"}, "a": "C", "cat": "CISO", "explanation": "常识", "cloze": false, "blanks": 1, "fold_point": null}, {"id": 87, "q": "87.以下关于互联网协议安全（Internet Protocol Security,IPsec）协议说法错误的是（）.", "opts": {"A": "在传送模式中，保护的IP负载", "B": "验证头协议（Authentication Head,AH）和IP封装安全载荷协议（Encapsu;ating Security Payload,ESP）都能以传输模式式作", "C": "在隧道模式中，保护的是整个互联网协议（Internet Protocol,IP）包，包括IP头", "D": "IPsec仅能保证传输数据的可认认证性和保密性"}, "a": "D", "cat": "CISO", "explanation": "教材P337", "cloze": false, "blanks": 1, "fold_point": null}, {"id": 88, "q": "88.为保障信息系统的安全，某经营公众服务系统的公可准备并编制一份针对性的信息安全保障方案，并将编制任务交给了小王，为此，小王决定首先编制出一份信息安全需求描述报告。关于此项工作,下面说法错误的是( ) .", "opts": {"A": "信息安全需求报告应依据该公众服务信息系统的功能设计方案为主要内容来撰写", "B": "信息安全需求描述报告是设计和撰写信息安全保障方案的前提和依据", "C": "信息安全需求描述报告应当基于信息安全风险评估结果和有关政策法规和标准的合规性要求得到", "D": "信息安全需求描述报告的主体内容可以按照技术，管理和工程等方面需求展开编写"}, "a": "A", "cat": "CISO", "explanation": "保障章节，安全需求不是来自于系统的功能设计方案", "cloze": false, "blanks": 0, "fold_point": null}, {"id": 89, "q": "89.为了能够合理，有序地处理安全事件，应事先制定出事件应急响应方法和过程，有助于一个组织在事件发生时阻止混乱的发生或是在混乱状态中迅速恢复控制，将损失和负面影响降至最低，PDCERF方法论是一种广泛使用的方法，其将应急响应分成六个阶段，如下图所示，请为图中括号空白处选择合适的内容（）.", "opts": {"A": "培训阶段", "B": "文档阶段", "C": "报告阶段", "D": "检测阶段"}, "a": "D", "cat": "CISO", "explanation": "业务连续性章节", "cloze": false, "blanks": 1, "fold_point": null}, {"id": 90, "q": "90.作为信息安全从业人员，以下哪种行为违反了CISP职业道德准则（）.", "opts": {"A": "抵制通过网络系统侵犯公众合法权益", "B": "通过公众网络传播非法软件", "C": "不在计算机网络系统中进行造谣、欺诈、诽谤等活动", "D": "帮助和指导信息安全同行提升信息安全保障知识和能力"}, "a": "B", "cat": "CISO", "explanation": "B明显是坏事", "cloze": false, "blanks": 1, "fold_point": null}, {"id": 91, "q": "91.对信息安全事件的分级参考下列三个要素：信息系统的重要程度、系统损失和社会影响，依据信息系统的重要程度对信息上系统进行划分，不属于正确划分级别的是（）.", "opts": {"A": "特别重要信息系统", "B": "重要信息系统", "C": "一般信息系统", "D": "关键信息系统"}, "a": "D", "cat": "CISO", "explanation": "业务连续性章节", "cloze": false, "blanks": 1, "fold_point": null}, {"id": 92, "q": "92.《国家信息化领导小组关于加强信息安全保障工作的意见》中办发【2003】27号明确了我国信息安全保障工作的（），加强信息安全保障工作的（），需要重点加强的信息安全保障工作，27号文的重大意义是，安标志着我国信息安全保障工作有了（），我国最近十余年的信息安全保障工作都是围绕此政策性文件而（）的，渗透了我国（）的各项工作。", "opts": {"A": "方针；主要原则；总体纲领；展开和推进；信息安全保障建设", "B": "总体要求；总体纲领；主要原则；展开；信息安全保障建设", "C": "方针和总体要求；主要原则；总体纲领；展开和推进；信息安全保障建设", "D": "总体要求；主要原则；总体纲领；展开；信息安全保障建设"}, "a": "C", "cat": "CISO", "explanation": "教材保障章节", "cloze": true, "blanks": 5, "fold_point": 116}, {"id": 93, "q": "93.ISO9001-2000标准和鼓励在制定、实施质量管理体系以及改进其有效性时采用过程方法，通过满足顾客要求，增进顾客满意度，下图是关于过程方法的示意图，图中括号空白处应填写（）", "opts": {"A": "策略", "B": "管理者", "C": "组织", "D": "活动"}, "a": "D", "cat": "CISO", "explanation": "这个图在3.0版本教材才有大图，目前4.0是个小图，我给大家放大 管理章节信息安全管理基本概念", "cloze": false, "blanks": 1, "fold_point": null}, {"id": 94, "q": "94.以下关于项目的含义，理解错误的是（）.", "opts": {"A": "项目是为达到特定的目的、使用一定资源、在确定的期间内、为特定发起人而提供独特的产品、服务或成果而进行的一次性努力。", "B": "项目有明确的开始日期，结束日期由项目的领导者根据项目进度来随机确定。", "C": "项目资源指完成项目所需要的人、财、物等。", "D": "项目目标要遵守SMART 原则，即项目的目标要求具体(Specific)、可测量（Measurable)、需相关方的一致同意(Agree to)、现实(Realistic)、有一定的时限(Time-oriented)"}, "a": "B", "cat": "CISO", "explanation": "教材P176", "cloze": false, "blanks": 1, "fold_point": null}, {"id": 95, "q": "95.Linux系统的安全设置主要从磁盘分区、账户安全设置、禁用危险服务、远程登录安全、用户鉴别安全、审计策略、保护root账户、使用网络防火墙和文件权限操作共10个方面来完成，小张在学习了Linux系统安全的相关知识后，尝试为自己计算机的Linux系统进行安全配置。下列选项是他的部分操作，其中不合理是（）.", "opts": {"A": "编辑文件/etc/passwd,检查文件中用户ID，禁用所有的ID=0的用户", "B": "编辑文件/etc/ssh/sshd_config,将Penmitroorlogin 设置为no", "C": "编辑文件/etc/pam.d/system-auth,设置auth required pam_tally.so onerr=fail deny=6 unlock_time=300", "D": "编辑文件/etc/profile,设置TMOUT=600"}, "a": "A", "cat": "CISO", "explanation": "ID=0的用户是ROOT", "cloze": false, "blanks": 1, "fold_point": null}, {"id": 96, "q": "96.规范的实施流程和文档管理，是信息安全风险评估能否取得成果的重要基础，某单位在实施风险评估时，按照规范形成了若干文档，其中，下面（）中的文档应属于风险评估中“风险要素识别”阶段输出的文档。", "opts": {"A": "《风险评估方案》，主要包括本次风险评估的目的、范围、目标、评估步骤、经费预算和进度安排等内容", "B": "《风险评估方法和工具列表》，主要包括拟用的风险评估方法和测试评估工具等内容", "C": "《风险评估准则要求》，主要包括现有风险评估参考标准、采用的风险分析方法、资产分类标准等内容", "D": "《已有安全措施列表》，主要包括经检查确认后的已有技术和管理各方面安全措施等内容"}, "a": "D", "cat": "CISO", "explanation": "风险评估章节", "cloze": false, "blanks": 1, "fold_point": null}, {"id": 97, "q": "97.某信息安全公司的团队某款名为“红包快抢”的外挂进行分析，发现此外挂是一个典型的木马后门，使黑客能够获得受害者电脑的访问权，该后门程序为了达到长期驻留在受害都的计算机中，通过修改注册表启动项来达到后门程序随受害者计算机系统启动而启动，这防范此类木马后门的攻击，以下做法无用的是（）", "opts": {"A": "不下载，不执行、不接收来厉明的软件", "B": "修改用户名和口令", "C": "不随意打开来历不明的邮件，不浏览不健康不正规的网站", "D": "安装反病毒软件和防火墙，安装专门的木马防治软件"}, "a": "B", "cat": "CISO", "explanation": "修改用户名和口令不能防木马", "cloze": false, "blanks": 1, "fold_point": null}, {"id": 98, "q": "98.关于信息安全管理体系的作用，下面理解错误的是（）.", "opts": {"A": "对内而言，有助于建立起文档的信息安全管理规范，实现有“法”可依，有章可循，有据可查", "B": "对内而言，是一个光钱不挣钱的事情，需要组织通过其他方面收入来弥补投入", "C": "对外而言，有肋于使各利益相关方对组织充满信心", "D": "对外而言，能起到规范外包工作流程和要求，帮助界定双方各自信息安全责任"}, "a": "B", "cat": "CISO", "explanation": "虽然是真话，但是做人不能太诚实，真的不能说出来", "cloze": false, "blanks": 1, "fold_point": null}, {"id": 99, "q": "99.风险，在GB／T 22081 中定义为事态的概率及其结果的组合，风险的目标可能有很多不同的方面，如财务目标、健康和人身安全目标、信息安全目标和环境目标等；目标也可能有不同的级别，如战略目标、组织目标、项目目标、产品目标和过程目标等。ISO／IBC  13335-1  中揭示了风险各要素关系模型，如图所示，请结合此图，怎么才能降低风险对组织产生的影响？（）", "opts": {"A": "组织应该根据风险建立响应的保护要求，通过构架防护措施降低风险对组织产生的影响", "B": "加强防护措施，降低风险", "C": "减少威胁和脆弱点降低风险", "D": "减少资产降低风险"}, "a": "A", "cat": "CISO", "explanation": "A综合包含了BCD的内容", "cloze": false, "blanks": 1, "fold_point": null}, {"id": 100, "q": "100.以下关于数字签名说法正确的是（）", "opts": {"A": "数字签名是在所传输的数据后附加上一段和传输数据毫无关系的数字信息", "B": "数字签名能够解决数据的加密传输，即安全传输问题", "C": "数字签名一般采用对称加密机制", "D": "数字签名能够解决篡改、伪造等安全性问题"}, "a": "D", "cat": "CISO", "explanation": "教材P285", "cloze": false, "blanks": 1, "fold_point": null}, {"id": 101, "q": "101.小李在检查公司对外服务网站的源代码时，发现程序在发生诸如没有找到资源、数据库连接错误、写临时文件错误等问题时，会将详细的错误原因在结果页面上显示出来。从安全角度考虑，小李决定修改代码。将详细的错误原因都隐藏起来，在页面上仅仅告知用户“抱歉。发生内部错误！“请问这种处理方法的主要目的是（）", "opts": {"A": "避免缓冲区溢出", "B": "安全出来系统异常", "C": "安全使用临时文件", "D": "最小化反馈信息"}, "a": "D", "cat": "CISO", "explanation": "课本P413 (3)最小化反馈:最小化反馈是指在程序内部处理时,尽量将少的信息反馈到运行界 面，即避免给予不可靠用户过多的信息，防止不可靠用户据此猜测软件程序的运行处理机 制。最小化反馈可以用在成功的流程，也可以用在发生错误的流程中。典型的例子如用户 名和口令认证程序，不管用户是用户名输入错误还是口令输人错误，认证端都只反馈统一 的“用户名/口令错误”，而不是分别告知“用户名错误”和“口令错误”，这样可以避免 让攻击者猜测已经存在的用户名，并根据用户名来猜测口令。当然，作为软件程序的跟踪 检查日志，可以记录较为详细的程序运行信息，而这些信息只允许有权限的人员查看。", "cloze": false, "blanks": 1, "fold_point": null}, {"id": 102, "q": "102.在某信息系统的设计中，用户登陆过程是这样的：（1）用户通过HTTP协议访问信息系统；（2）用户在登陆页面输入用户名和口令：（3）信息系统在服务器端检查用户名和密码的正确性，如果正确，则鉴别完成。可以看出，这个鉴别过程属于（）", "opts": {"A": "单向鉴别", "B": "双向鉴别", "C": "三向鉴别", "D": "第三方鉴别"}, "a": "A", "cat": "CISO", "explanation": "课本P293", "cloze": false, "blanks": 1, "fold_point": null}, {"id": 103, "q": "103.关于ARP欺骗原理和防范措施，下面理解错误的是（）", "opts": {"A": "ARP 欺骗是指攻击者直接向受害者主机发送错误人ARP应答报文，使得受害者主机将错误的硬件地址映射关系存入到ARP缓存中，从而起到冒充主机的目的", "B": "单纯利用ARP欺骗攻击时，ARP欺骗通常影响的是内部子网，不能跨越路由实施攻击", "C": "解决ARP欺骗的一个有效方法是采用“静态”的ARP缓存，如果发生硬件地址的更改，则需要人工更新缓存", "D": "彻底解决ARP欺骗的方法是避免使用ARP协议和ARP缓存，直接采用IP地址和其他主机进行连接"}, "a": "D", "cat": "CISO", "explanation": "课本P347", "cloze": false, "blanks": 1, "fold_point": null}, {"id": 104, "q": "104.关于Wi-Fi联盟提出的安全协议WPA和WPA2的区别，下面描述正确的是（）", "opts": {"A": "WPA是有线局域安全协议，而WPA2是无线局域网协议", "B": "WPA是适用于中国的无线局域安全协议，而WPA2是适用于全世界的无线局域网协议", "C": "WPA没有使用密码算法对接入进行认证，而WPA2使用了密码算法对接入进行认证", "D": "WPA是依照802.11i标准草案制定的，而WPA2是依照802.11i正式标准制定的"}, "a": "D", "cat": "CISO", "explanation": "课本P341", "cloze": false, "blanks": 1, "fold_point": null}, {"id": 105, "q": "105.一个密码系统至少由明文、密文、加密算法、解密算法和密钥5部分组成，而其安全性是由下列哪个选项决定的（）", "opts": {"A": "加密算法", "B": "解密算法", "C": "加密和解密算法", "D": "密钥"}, "a": "D", "cat": "CISO", "explanation": "现代密码学是基于科科霍夫假设的，算法公开，秘钥保密，秘钥的强度决定了密码系统的强度", "cloze": false, "blanks": 1, "fold_point": null}, {"id": 106, "q": "106.某集团公司根据业务需要，在各地分支机构部署前置机，为了保证安全，集团总部要求前置机开放日志共享，由总部服务器采集进行中集中分析，在运行过程中发现攻击者也可通过共享从前置机中提取日志，从而导致部分敏感信息泄漏，根据降低攻击面的原则，应采取以下哪项处理措施（）", "opts": {"A": "由于共享导致了安全问题，应直接关闭日志共享，禁止总部提取日志进行分析", "B": "为配合总部的安全策略，会带来一定的安全问题，但不影响系统使用，因此接受此风险", "C": "日志的存在就是安全风险，最好的办法就是取消日志，通过设置让前置机不记录日志", "D": "只允许特定的IP地址从前置机提取日志，对日志共享设置访问且限定访问的时间"}, "a": "D", "cat": "CISO", "explanation": "日志是审计的前提，必须要有，然后就需要降低攻击面 课本P409", "cloze": false, "blanks": 1, "fold_point": null}, {"id": 107, "q": "107.信息安全保障技术框架（Informetion Assurance Technical Fromwork,IATF）,目的是为保障政府和工业的（）提供了（），信息安全保障技术框架的一个核心思想是（），深度防御战略的三个核心要素：（）、技术和运行（亦称为操作）", "opts": {"A": "信息基础设施：技术指南：深度防御：人员", "B": "技术指南：信息基础设施：深度防御：技术指南：人员", "C": "信息基础设施：深度防御：技术指南：人员", "D": "信息基础设施：技术指南：人员：深度防御"}, "a": "A", "cat": "CISO", "explanation": "课本P27页", "cloze": true, "blanks": 4, "fold_point": 132}, {"id": 108, "q": "108.TCP/IP协议就Internet最基本的协议，也是Internet构成的基础，TCP/IP通常被认为就是一个N 层协议，每一层都使用它的下一层所提供的网络服务来完成自己的功能，这里N应等于（）", "opts": {"A": "4", "B": "5", "C": "6", "D": "7"}, "a": "A", "cat": "CISO", "explanation": "课本P334", "cloze": false, "blanks": 1, "fold_point": null}, {"id": 109, "q": "109．下列我国哪一个政策性文件明确了我国信息安全保障工作的方针和总体要求以及加强信息安全保障工作的主要原则（C）", "opts": {"A": "《关于加强政府信息系统安全和保密管理工作的通知》", "B": "《中华人民共和国计算机信息系统安全保护条例》", "C": "《国家信息化领导小组关于加强信息安全保障工作的意见》", "D": "《关于开展信息安全风险评估工作的意见》"}, "a": "C", "cat": "CISO", "explanation": "监管章节", "cloze": false, "blanks": 0, "fold_point": null}, {"id": 110, "q": "110．数据库的安全报复杂，往往需要考虑多种安全策略，才可以更好地保护数据库的安全，以下关于数据库常用的安全策略理解不正确的是（）", "opts": {"A": "最小特权原则，是让用户可以合法的存取或修改数据库的前提下，分配最小特权，使得这些信息恰好能够实现用户的工作", "B": "最大共享策略，在保护数据库的完整性，保密性和可用性的前提下，最大程度地共享数据库中的信息", "C": "粒度最小策略，将数据库中的数据项进行划分，粒度越小，安全级别越高，在实际中需要选择最小粒度", "D": "按内容存取控制策略，不同权限的用户访问数据库的不同部分"}, "a": "C", "cat": "CISO", "explanation": "数据库安全策略有6项：最小特权策略、最大共享策略、粒度适当策略、按内容存取控制策略、开系统和闭系统策略、按存取类型控制策略. 粒度适当策略：将数据库中不同的项分成不同的粒度，颗粒越小、安全级别越高，通常要根据实际决定粒度大小", "cloze": false, "blanks": 1, "fold_point": null}, {"id": 111, "q": "111.若一个组织声称自己的ISMS符合ISO／IEC27001或GB／T22080标准要求，其信息安全控制措施通常需要在物理和环境安全方面实施常规控制，物理和环境安全领域包括安全区域和设备安全两个控制目标，安全区域的控制目标是防止对组织场所和信息的未授权物理访问、损坏和干扰，关键或敏感的信息处理设施应放在安全区域内，并受到相应保护，该目标可以通过以下控制措施来实现，不包括哪一项（）", "opts": {"A": "物理安全边界，物理入口控制", "B": "办公室，房间和设施的安全保护，外部和环境威胁的安全防护", "C": "在安全区域工作，公共访问，交接区安全", "D": "人力资源安全"}, "a": "D", "cat": "CISO", "explanation": "27002 安全区域 控制目标：防止对组织场所和信息过程设备的未授权物理访问、损坏和干扰。 控制措施：物理安全边界、物理入口控制、办公室、房间和设施的安全保护、外部和环境威胁的安全防护、在安全区域工作、送货和装卸区", "cloze": false, "blanks": 1, "fold_point": null}, {"id": 112, "q": "112.Kerbeos协议是一种集中访问控制协议，它能在复杂的网络环境中，为用户提供安全的单点登录服务，单点登录是指用户在网络中进行一次身份认证，便可以访问其授权的所有网络资源，而不再需要其他的身份认证过程，实质是消息M在多个应用系统之间的传递或共享，其中，消息M是指以下选项中的（）", "opts": {"A": "安全凭证", "B": "用户名", "C": "加密密钥", "D": "会话密钥"}, "a": "A", "cat": "CISO", "explanation": "根据下面的语义分析应该是A", "cloze": false, "blanks": 1, "fold_point": null}, {"id": 113, "q": "113.分布式拒绝服务（Distributed  Denial of  Service, DDoS）攻击指借助于客户／服务器技术，将多个计算机联合起来作为攻击平台，对一个或多个目标发动DDoS攻击，从而成倍地提高拒绝服务攻击的威力，一般来说，DDoS攻击的主要目的是破坏目标系统的（）", "opts": {"A": "保密性", "B": "完整性", "C": "可用性", "D": "真实性"}, "a": "C", "cat": "CISO", "explanation": "常识，DDOS就是破坏可用性", "cloze": false, "blanks": 1, "fold_point": null}, {"id": 114, "q": "114.在软件保障成熟度模型（Software Assurnce Maturity Mode, SAMM）中，规定了软件开发过程中的核心业务功能，下列哪个选项不属于核心业务功能（）", "opts": {"A": "治理，主要是管理软件开发的过程和活动", "B": "构造，主要是在开发项目中确定目标并开发软件的过程与活动", "C": "验证，主要是测试和验证软件的过程和活动", "D": "购置，主要是购买第三方商业软件或者采用开源组件的相关管理过程与活动"}, "a": "D", "cat": "CISO", "explanation": "移植题目，参考答案即可", "cloze": false, "blanks": 1, "fold_point": null}, {"id": 115, "q": "115.公钥基础设施（Public Key Infrastructure,PKI）引入数字证书的概念，用来表示用户的身份，下图简要地描述了终端实体（用户）从认证权威机构CA申请、撤销和更新数字证书的流程，请为中间框空白处选择合适的选项（）", "opts": {"A": "证书库", "B": "RA", "C": "OCSP", "D": "CRL库"}, "a": "B", "cat": "CISO", "explanation": "课本P286", "cloze": false, "blanks": 1, "fold_point": null}, {"id": 116, "q": "116．／etc/peddwd文件是UNIX／Linux安全的关键是文件之一，该文件用于用户登录时校验用户的登录名、加密的口令数据项、用户ID（UID）、默认的用户分组ID（GID）、用户信息、用户登录目录以及登录后使用的shell程序。某黑客设法窃取了银行账户管理系统的passwd文件后，发现每个用户的加密口令数据项都是显示为“X”，下列选项中，对此现象的解释正确的是（）", "opts": {"A": "黑客窃取的passwd 文件是假的", "B": "用户的登录口令经过不可逆转的加密算法加密结果为“X”", "C": "加密口令被转移到了另一个文件里", "D": "这些账户都被禁用了"}, "a": "C", "cat": "CISO", "explanation": "", "cloze": false, "blanks": 1, "fold_point": null}, {"id": 117, "q": "117.由于频繁出现软件运行时被黑客远程攻击获取数据的现象，某软件公司准备加强软件安全开发管理，在下面做法中，对于解决问题没有直接帮助的是（）", "opts": {"A": "要求开发人员采用敏捷开发模型进行开发", "B": "要求所有的开发人员参加软件安全意识培训", "C": "要求规范软件编码，并制定公司的安全编码准则", "D": "要求增加软件安全测试环节，尽早发现软件安全问题"}, "a": "A", "cat": "CISO", "explanation": "启用影子口令", "cloze": false, "blanks": 1, "fold_point": null}, {"id": 118, "q": "118.某社交网站的用户点击了该网站上的一个广告，该广告含有一个跨站脚本，会将他的浏览器定向到旅游网站，旅游网站则获得了他的社交网络信息，虽然该用户没有主动访问该旅游网站，但旅游网站已经截获了他的社交网络信息（还有他的好友们的信息），于是犯罪分子便可以躲藏在社交网站的广告后面，截获用户的个人信息了，这种向Web页面插入恶意html代码的攻击方式称为（B）", "opts": {"A": "分布式拒绝服务攻击", "B": "跨站脚本攻击", "C": "SQL注入攻击", "D": "缓冲区溢出攻击"}, "a": "B", "cat": "CISO", "explanation": "教材P377", "cloze": false, "blanks": 0, "fold_point": null}, {"id": 119, "q": "119.Windows系统中，安全标识符（SID）是标识用户、组和计算机账户的唯一编码，在操作系统内部使用，当授予用户、组、服务或者其他安全主休访问对象的权限时，操作系统会把SID和权限写入对象的ACL中，小刘在学习了SID的组成后，为了巩固所学知识，在自己计算机的Windows操作系统中使用whooml/users操作查看当前用户的SID，得到是的SID为S-1-5-21-1534169462-1651380828-111620652-500。下列选项中，关于此SID的理解错误的是（）", "opts": {"A": "前三位S-1-5表示此SID是由Windows NT 颁发的", "B": "第一个子颁发机构是21", "C": "Windows NT 的SID的三个子颁发机构是 1534169462、1651380828、111620651", "D": "此SID以500结尾，表示内置guest"}, "a": "D", "cat": "CISO", "explanation": "", "cloze": false, "blanks": 1, "fold_point": null}, {"id": 120, "q": "120.某电子商务网战在开发设计时，使用了威胁建模方法来分析电子商务网站所面临的威胁，STRIDE是微软SDL中提出的威胁建模方法，将威胁分为六类，为每一类威胁提供了标准的消减措施，Spoofing 是STRIDE中欺骗类的威胁，以下威胁中哪个可以归入此类威胁（）", "opts": {"A": "网站竟争对手可能雇佣攻击者实施DDOS攻击，降低网站访问速度", "B": "网站使用HTTP协议进行浏览等操作，未对数据进行加密，可能导致用户传输信息泄漏，例如购买的商品金额等", "C": "网站使用HTTP协议进行浏览等操作，无法确认数据与用户发出的是否一致辞，可能数据被中途篡改", "D": "网站使用用户名、密码进行登录验证，攻击者可能会利用弱口令或其他方式获得用户密码，以该用户身份登录修改用户订单等信息"}, "a": "D", "cat": "CISO", "explanation": "Spoofing (假冒)木马伪装成ntdll.dll，钓鱼网站伪装成microsoft.com", "cloze": false, "blanks": 1, "fold_point": null}, {"id": 121, "q": "121.某购物网站开发项目经过需求分析进入系统设计阶段，为了保证用户账户的安全，项目开发人员决定用户登录时除了用户名口令认证方式外，还加入基于数字证书的身份认证功能，同时用户口令使用SMA-1算法加密后存放在后台数据库中，请问以上安全设计遵循的是哪项安全设计原则（）", "opts": {"A": "最小特权原则", "B": "职责分离原则", "C": "纵深防御原则", "D": "最少共享机制原则"}, "a": "C", "cat": "CISO", "explanation": "", "cloze": false, "blanks": 1, "fold_point": null}, {"id": 122, "q": "122.若一个组织声称自己的ISMS符合ISO/IBC 27001或GB/T22080标准要求，其信息安全控制措施通常在以下方面实施常规控制，不包括哪一项（）", "opts": {"A": "信息安全方针、信息安全组织、资产管理", "B": "人力资源安全、物理和环境安全、通信和操作管理", "C": "访问控制、信息系统获取、开发和维护、符合性", "D": "规划与建立ISMS"}, "a": "D", "cat": "CISO", "explanation": "D是27001建立ISMS四步法的第一步，并不是27002中的控制项", "cloze": false, "blanks": 1, "fold_point": null}, {"id": 123, "q": "123.下面对过国家秘密定级和范围的描述，哪项不符合《保守国家秘密法》要求（）", "opts": {"A": "国家秘密及其密级的具体范围，由国家保密工作部分分别会问外交、公安、国家安全和其他中央有关机关规定", "B": "各级国家机关、单位对所产生的国家秘密事项，应当按照国家秘密及其密级具体范围的规定确定密级", "C": "对是否属于国家秘密和属于何种密级不明确的事项，可由各单位自行参考国家要求确定和定级，然后报国家保密工作部分确定", "D": "对是否属于国家秘密和属于何种密级不明确的事项，由国家保密工作部分，省，自治区、直辖市的保密工作部门，省、自治区政府所在地的市和经国务院批准的较大的时的保密工作部分或者国家保密工作部门审定的机关确定"}, "a": "C", "cat": "CISO", "explanation": "C和D是相悖的说法，明显D是正确的，教材P57没有很清楚的解释 保密法第十条\n对是否属于国家秘密和属于何种密级不明确的事项，依照下列规定确定：\n（一）绝密级由国家保密工作部门确定；\n（二）机密级由省、自治区、直辖市的或者其上级的保密工作部门确定；\n（三）秘密级由省、自治区政府所在地的市和国务院批准的较大的市的或者其上级的保密工作部门确定。 其他机关经国家保密工作部门审定，可以在其主管业务方面行使前款规定的确定密级权。", "cloze": false, "blanks": 1, "fold_point": null}, {"id": 124, "q": "124.随着信息安全涉及的范围越来越广，各个组织对信息安全管理的需求越来越迫切，越来越多的组织开始尝试使用参考ISO27001介绍的ISMS来实施信息安全管理体系，提高组织的信息安全管理能力，关于ISMS，下面描述错误的是（）.", "opts": {"A": "在组织中，应由信息技术责任部门（如信息中心）制定并颁布信息安全方针，为组织的ISMS建设指明方向并提供总体纲领，明确总体要求", "B": "组织的管理层应确保ISMS目标和相应的计划得以制定，信息安全管理目标应明确、可度量，风险管理计划应其体，具备可行性", "C": "组织的信息安全目标、信息安全方针和要求应传达到全组织范围内，应包括全体员工，同时，也应传达到客户、合作伙伴和供应商等外部各方", "D": "组织的管理层应全面了解组织所面临的信息安全风险，决定风险可接受级别和风险可接受准则，并确认接受相关残余风险"}, "a": "A", "cat": "CISO", "explanation": "管理章节", "cloze": false, "blanks": 1, "fold_point": null}, {"id": 125, "q": "125.关于密钥管理，下列说法错误的是（）", "opts": {"A": "科克霍夫原则指出算法的安全性不应基于算法的保密，而应基于密钥的安全性", "B": "保密通信过程，通信使用之前用过的会话密钥建立会话，不影响通信安全", "C": "密钥管理需要考虑密钥产生、存储、备份、分配、更新、撤销等生命周期过程的每一个环节", "D": "在网络通信中，通信双方可利用Diffie-Hellman协议协商出会话密钥"}, "a": "B", "cat": "CISO", "explanation": "会话密钥每次要用新的", "cloze": false, "blanks": 1, "fold_point": null}, {"id": 126, "q": "126.防火墙是网络信息系统建设中常常采用的一类产品，它在内外网隔离方面的作用是（）", "opts": {"A": "既能物理隔离，又能逻辑隔离", "B": "能物理隔离，但不能逻辑隔离", "C": "不能物理隔离，但是能逻辑隔离", "D": "不能物理隔离，也不能逻辑隔离"}, "a": "C", "cat": "CISO", "explanation": "常识", "cloze": false, "blanks": 1, "fold_point": null}, {"id": 127, "q": "127.以下关于威胁建模流程程步骤说法不正确的是（）", "opts": {"A": "威胁建模主要流程包过四步；确定建模对象、识别威胁、评估威胁和消减威胁", "B": "评估威胁是对威胁进行分析，评估被利用和攻击发生的概率，了解被攻击资产的受损后果，并计算风险", "C": "消减威胁是根据威胁的评估结果，确定是否要消除该威胁以及消减的技术措施，可以通过重新设计直接消除威胁，或设计采用技术手法来消减威胁", "D": "识别威胁是发现组件或进程存在的威胁，它可能是悉意的，威胁就是漏洞"}, "a": "D", "cat": "CISO", "explanation": "D是编的 威胁建模四步：确定对象、识别威胁、评估威胁、消减威胁 评估威胁：对威胁进行分析，评估被利用和攻击发生的概率，了解被攻击后资产的受损后果，并计算风险。 消减威胁：根据威胁的评估结果，确定是否要消除该威胁以及消减的技术措施。在设计阶段 可以通过重新设计，以直接消除威胁，或设计采用技术手段来消减威胁在本阶段， 应在确定消减威胁手段后继续评估是否可以接受残余的安全风险。", "cloze": false, "blanks": 1, "fold_point": null}, {"id": 128, "q": "128.有关系统共程的特点，以下错误的是（）", "opts": {"A": "系统工程研究问题一般采用先决定整体框架，后进入详细设计的程序", "B": "系统工程的基本特点，是需要把研究对象结构为多个组织部分分别独立研究", "C": "系统工程研究强调多学科协作，根据研究问题涉及到的学科和专业范围，组成一个知识结构合理的专家体系", "D": "系统工程研究是以系统思想为指导，采取的理论和方法是综合集成各学科、各领域的理论和方法"}, "a": "B", "cat": "CISO", "explanation": "教材P175", "cloze": false, "blanks": 1, "fold_point": null}, {"id": 129, "q": "129.由于密码技术都依赖于密钥匙，因此密钥的安全管理是密钥技术应用中非常重要的环节，下列关于密钥匙管理说法错误的是（）", "opts": {"A": "科克霍夫在《军事密码学》中指出系统的保密性不依赖于对加密体制或算法的保密，而依赖于密钥", "B": "在保密通信过程中，通信双方可以一直使用之前用过的会话密钥，不影响安全性", "C": "密钥匙管理需要在安全策略的指导下处理密钥生命周期的整个过程，包括产生、存储、备份、分配、更新、撤销等", "D": "在保密通信过程中，通信双方也可利用Diffie-Helinan协议协商会话密钥进行保密通信"}, "a": "B", "cat": "CISO", "explanation": "常识，会话密钥应该每次更新", "cloze": false, "blanks": 1, "fold_point": null}, {"id": 130, "q": "130．某单位门户网站开发完成后，测试人员使用模型测试进行安全性测试，以下关于模糊测试过程的说法正确的是（）", "opts": {"A": "模拟正常用户输入行为，生成大量数据包作为测试用例", "B": "数据处理点，数据通道的入口点和可信边界点往往不是测试对象", "C": "监测和记录输入数据后程序正常运行的情况", "D": "深入分析问题测试过程中产生崩溃或异常的原因，必要时需要测试人员手工重现并分析"}, "a": "D", "cat": "CISO", "explanation": "教材P421", "cloze": false, "blanks": 1, "fold_point": null}, {"id": 131, "q": "131.根据《关于开展信息安全风险评估工作的意见》的规定，错误的是（）", "opts": {"A": "信息安全风险评估分自评估、检查评估两形式，应以检查评估为主，自评估和检查评估相互结合、互为补充", "B": "信息安全风险评估工作要按照“严密组织、规范操作、讲求科学、注重实效‘的原则开展", "C": "信息安全风险评估应管贯穿于网络和信息系统建设运行的全过程", "D": "开展信息安全风险评估工作应加强信息安全风险评估工作的组织领导"}, "a": "A", "cat": "CISO", "explanation": "以自评估为主", "cloze": false, "blanks": 1, "fold_point": null}, {"id": 132, "q": "132.Linux系统文件的访问权限属性通过9个字符来表示 ，分别表示文件属主、文件所属组用户……的读（r）、写（w）及执行（x）的权限，文件usr/bin/passwd的属性如下图所示，在文件中……位s，下列选项中对这一位s的理解正确的是（）（省略号表示：看不清题干的文字）", "opts": {"A": "文件权限出现了错误，出现s的位应该改为x;", "B": "s表示sticky位，是指sticky位后，就算用户对目录具有写权限，也不能删除该文件", "C": "s表示SGID位，文件在执行阶段具有文件所在组的权限", "D": "s表示SUID位，文件在执行阶段具有文件所有者的权限"}, "a": "D", "cat": "CISO", "explanation": "当s权限在user的x时，也就是类似 -r-s--x--x，称为Set UID，简称为SUID，这个UID表示User的ID，而User表示这个程序（/usr/bin/passwd）的拥有者（root）。", "cloze": false, "blanks": 1, "fold_point": null}, {"id": 133, "q": "133.具有行政法律责任强制的安全管理规定和安全制度包括（）", "opts": {"A": "1，2，4", "B": "1,2，3", "C": "2，3, 4", "D": "1，2, 3"}, "a": "A", "cat": "CISO", "explanation": "移植题目", "cloze": false, "blanks": 1, "fold_point": null}, {"id": 134, "q": "134.随着即时通讯软件的普及使用，即时通讯软件也被恶意代码利用进行传播，以下哪项功能不是恶意代码利用即时通讯进行传播的方式（）", "opts": {"A": "利用即时通讯软件的文件传送功能发送带恶意代码的可执行文件", "B": "利用即时通讯软件发送指向恶意网页的URL", "C": "利用即时通讯软件发送指向恶意地址的二维码", "D": "利用即时通讯发送携带恶意代码的TXT文档"}, "a": "C", "cat": "CISO", "explanation": "二维码腾讯有过滤", "cloze": false, "blanks": 1, "fold_point": null}, {"id": 135, "q": "135.PDCA循环又叫戴明环，是管理学常用的一种模型。关于PDCA四个字母，下面理解错误的是（）", "opts": {"A": "P是Plan，指分析问题、发现问题、确定方针、目标和活动计划", "B": "D是Do，指实施、具体运作，实现计划中的内容", "C": "C是Check，指检查、总结执行计划的结果，明确效果，找出问题", "D": "A 是Aim，指瞄准问题，抓住安全事件的核心，确定责任"}, "a": "D", "cat": "CISO", "explanation": "四采取纠正和预防措施，持续改进：Act改进(维护和改进ISMS)", "cloze": false, "blanks": 1, "fold_point": null}, {"id": 136, "q": "136.为了保障系统安全，某单位需要对其跨地区大型网络实时应用系统进行渗透测试，以下关于渗透测试过程的说法不正确的是（）", "opts": {"A": "由于在实际渗透测试过程中存在不可预知的风险，所以测试前要提醒用户进行系统和数据备份，以便出现问题时可以及时恢复系统和数据", "B": "渗透测试从“逆向”的角度出发，测试软件系统的安全性，其价值在于可以测试软件在实际系统中运行时的安全状况", "C": "渗透测试应当经过方案制定、信息收集、漏洞利用、完成渗透测试报告等步骤", "D": "为了深入发掘该系统存在的安全威胁，应该在系统正常业务运行高峰期进行渗透测试"}, "a": "D", "cat": "CISO", "explanation": "27002 12.7 信息系统审计的考虑 目标：极小化审计行为对业务系统带来的影响。 12.7.1信息系统审计控制 控制措施 应精心计划涉及业务系统验证的审计要求和活动以极小化对业务流程的干扰（高峰期不做测试）。 例如：要与合适的管理者商定访问系统和数据的审计要求 要商定和控制技术审计测试的范围 审计测试仅限于对软件和数据的只读访问", "cloze": false, "blanks": 1, "fold_point": null}, {"id": 137, "q": "137.数字签名不能实现的安全特性为（）", "opts": {"A": "防抵赖", "B": "防伪造", "C": "防冒充", "D": "保密通信"}, "a": "D", "cat": "CISO", "explanation": "签名用的是私钥，可以被发出的公钥打开，无法实现保密通信", "cloze": false, "blanks": 1, "fold_point": null}, {"id": 138, "q": "138.超文本传输协议（HyperText Transfer Protocol,HTTP）是互联网上广泛使用的一种网络协议，下面哪种协议基于HTTP并结合SSL协议，具备用户鉴别和通信数据加密等功能（C）", "opts": {"A": "HTTP 1.0协议", "B": "HTTP 1.1协议", "C": "HTTPS协议", "D": "HHTTPD协议"}, "a": "C", "cat": "CISO", "explanation": "常识", "cloze": false, "blanks": 0, "fold_point": null}, {"id": 139, "q": "139.有关系统工程的特点，以下错误的是（）", "opts": {"A": "系统工程研究问题一般采用先决定整体框架，后进入详细设计的程序", "B": "系统工程的基本特点，是需要把研究对象结构为多个组织部分分别独立研究", "C": "系统工程研究强调多学科协作，根据研究问题涉及到的学科和专业范围，组成一个知识结构合理的专家体系", "D": "系统工程研究是以系统思想为指导，采取的理论和方法是综合集成各学科、各领域的理论和方法"}, "a": "B", "cat": "CISO", "explanation": "教材P175", "cloze": false, "blanks": 1, "fold_point": null}, {"id": 140, "q": "140.分组密码算法是一类十分重要的密码算法，下面描述中，错误的是（）", "opts": {"A": "分组密码算法要求输入明文按组分成固定长度的块", "B": "分组密码的算法每次计算得到固定长度的密文输出块", "C": "分组密码算法也称作序列密码算法", "D": "常见的DES、IDEA算法都属于分组密码算法"}, "a": "C", "cat": "CISO", "explanation": "分组和序列是不同的加密方式", "cloze": false, "blanks": 1, "fold_point": null}, {"id": 141, "q": "141.由于信息系统的复杂性，因此需要一个通用的框架对其进行解构和描述，然后再基于此框架讨论信息系统的（）。在LATF中，将信息系统的信息安全保障技术层面分为以下四个焦点领域：（）：区域边界即本地计算环境的外缘；()；支持性基础设施，在深度防御技术方案中推荐（）原则、（）原则", "opts": {"A": "网络和基础设施；安全保护问题；本地的计算机环境；多点防御；分层防御", "B": "安全保护问题；本地的计算机环境；多点防御；网络和基础设施；分层防御", "C": "安全保护问题；本地的计算机环境；网络和基础设施；多点防御；分层防御", "D": "本地的计算环境；安全保护问题；网络和基础设施；多点防御；分层防御"}, "a": "C", "cat": "CISO", "explanation": "教材P29，四个焦点领域填进去，第一个空需要猜，最后两个控肯定是多点防御；分层防御，那么合适的选项只有C", "cloze": true, "blanks": 5, "fold_point": 112}, {"id": 142, "q": "142.SABSA模型包括（），它是一个（）。它在第一层从安全的角度定义了（）。模型的每一层抽象方式逐层减少，细节逐层增加，因此，它的层级都是建立在其他层之上的，从策略逐渐到技术和解决方案的（）。其思路上重新提出了一个包括战略、概念、设计、实施、度量和审计层次的（）", "opts": {"A": "五层：业务需求；分层模型；实施实践；安全链条", "B": "六层：分层模型；业务需求；实施实践；安全链条", "C": "五层：分层模型；业务需求；实施实践；安全链条", "D": "六层：分层模型；实施实践；业务需求；安全链条"}, "a": "B", "cat": "CISO", "explanation": "教材P39", "cloze": true, "blanks": 5, "fold_point": 74}, {"id": 143, "q": "143.关于标准，下面哪项理解是错误的（）", "opts": {"A": "标准是在一定范围内为了获得最佳秩序，经协协商一致制定并由公认机构批准，共同重复使用的一种规范性文件，标准是标准化活动的重要成果", "B": "国际标准是由国际标准化组织通过并公布的标准，同样是强制性标准，当国家标准和国际标准的条款发生冲突，应以国际标准条款为准。", "C": "行业标准是针对没有国家标准而又才需要在全国某个行业范围统一的技术要求而制定的标准，同样是强制性标准，当行业标准和国家标准的条款发生冲突时，应以国家标准条款为准。", "D": "地方标准由省、自治区、直辖市标准化行政主管部门制度，冰报国务院标准化行政主管部门和国务院有关行政主管培训部门备案，在公布国家标准后，该地方标准即应废止。"}, "a": "B", "cat": "CISO", "explanation": "以国标为准", "cloze": false, "blanks": 1, "fold_point": null}, {"id": 144, "q": "144.Apache HTTP Server (简称Apache)是一个开放源代码Web服务运行平台，在使用过程中，该软件默认会将自己的软件名和版本号发送给客户端。从安全角度出发，为隐藏这些信息，应当采取以下哪种措施（）", "opts": {"A": "不选择Windows平台下安装使用", "B": "安装后，修改配置文件http.conf中的有关参数", "C": "安装后，删除Apache HTTP Server源码", "D": "从正确的官方网站下载Apache HTTP Server，并安装使用"}, "a": "B", "cat": "CISO", "explanation": "Apache的安全配置就在配置文件http.conf中的有关参数", "cloze": false, "blanks": 1, "fold_point": null}, {"id": 145, "q": "145.针对软件的拒绝服务攻击是通过消耗系统资源使软件无法响应正常请求的一种攻击方式，在软件开发时分析拒绝服务攻击的威胁，以下哪个不是需求考虑的攻击方式（）", "opts": {"A": "攻击者利用软件存在的逻辑错误，通过发送某种类型数据导致运算进入死循环，ＣＰＵ资源占用始终１００％", "B": "攻击者利用软件脚本使用多重嵌套咨询，在数据量大时会导致查询效率低，通过发送大量的查询导致数据库响应缓慢", "C": "攻击者利用软件不自动释放连接的问题，通过发送大量连接消耗软件并发连接数，导致并发连接数耗尽而无法访问", "D": "攻击者买通ＩＤＣ人员，将某软件运行服务器的网线拔掉导致无法访问"}, "a": "D", "cat": "CISO", "explanation": "D就不要考虑了，没有哪个系统防的住，参见棱镜门", "cloze": false, "blanks": 1, "fold_point": null}, {"id": 146, "q": "146.密码学是网络安全的基础，但网络安全不能单纯依靠安全的密码算法、密码协议也是网络安全的一个重要组成部分。下面描述中，错误的是（）", "opts": {"A": "在实际应用中，密码协议应按照灵活性好、可扩展性高的方式制定，不要限制和框住的执行步骤，有些复杂的步骤可以不明确处理方式。", "B": "密码协议定义了两方或多方之间为完成某项任务而指定的一系列步骤，协议中的每个参与方都必须了解协议，且按步骤执行。", "C": "根据密码协议应用目的的不同，参与该协议的双方可能是朋友和完全信息的人，也可能是敌人和互相完全不信任的人。", "D": "密码协议(Cryptographic protocol) ,有时也称安全协议(security protocol), 是使用密码学完成某项特定的任务并满足安全需求的协议，其末的是提供安全服务。"}, "a": "A", "cat": "CISO", "explanation": "A明显是编的", "cloze": false, "blanks": 1, "fold_point": null}, {"id": 147, "q": "147.入侵检测系统有其技术优越性，但也有局限性，下列说法错误的是（）", "opts": {"A": "对用户知识要求高，配置、操作和管理使用过于简单，容易遭到攻击", "B": "高虚频率，入侵检测系统会产生大量的警告信息和可疑的入侵行为记录，用户处理负担很重", "C": "入侵检测系统在应对自身攻击时，对其他数据的检测可能会被控制或者受到影响", "D": "警告消息记录如果不完整，可能无法与入侵行为关联"}, "a": "A", "cat": "CISO", "explanation": "教材P353", "cloze": false, "blanks": 1, "fold_point": null}, {"id": 148, "q": "148.以下关于法律的说法错误的是（）", "opts": {"A": "法律是国家意志的统一体现，有严密的逻辑体系和效力", "B": "法律可以是公开的，也可以是“内部”的", "C": "一旦制定，就比较稳定，长期有效，不允许经常更改", "D": "法律对违法犯罪的后果由明确规定，是一种“硬约束”"}, "a": "B", "cat": "CISO", "explanation": "常识，法律都是公开的", "cloze": false, "blanks": 1, "fold_point": null}, {"id": 149, "q": "149.实体身份鉴别的方法多种多样，且随着技术的进步，鉴别方法的强度不断提高，常见的方法有利用口令鉴别、令牌鉴别、指纹鉴别等。小王在登录某移动支付平台时，首先需要通过指纹对用户身份进行鉴别，通过鉴别后，他才能作为合法用户使用自己的账户进行支付、转账等操作。这种鉴别方法属于下列选项中的（）", "opts": {"A": "实体所知的鉴别方法", "B": "实体所有的鉴别方法", "C": "实体特征的鉴别方法", "D": "实体所见的鉴别方法"}, "a": "C", "cat": "CISO", "explanation": "指纹是实体特征", "cloze": false, "blanks": 1, "fold_point": null}, {"id": 150, "q": "150.在信息系统中，访问控制是重要的安全功能之一。它的任务是在用户对系统资源提供最大限度共享的基础上，对用户的访问权限进行管理，防止对信息的非授权篡改和滥用。访问控制模型将实体划分为主体和客体两类，通过对主体身份的识别来限制其对客体的访问权限。下列选项中，对主体、客体和访问权限的描述中错误的是（）", "opts": {"A": "对文件进行操作的用户是一种主体", "B": "主体可以接受客体的信息和数据，也可能改变客体相关的信息", "C": "访问权限是指主体对客体所允许的操作", "D": "对目录的访问权可分为读、写和拒绝访问"}, "a": "D", "cat": "CISO", "explanation": "目录只有读、写、执行三种操作", "cloze": false, "blanks": 1, "fold_point": null}, {"id": 151, "q": "151.《信息安全保障技术框架》（（Information Assurance Technical Framework，IATF）是由（）发布的", "opts": {"A": "中国", "B": "美国", "C": "俄罗斯", "D": "欧盟"}, "a": "B", "cat": "CISO", "explanation": "IATF是美国国防部文件", "cloze": false, "blanks": 1, "fold_point": null}, {"id": 152, "q": "152.小张新购入了一台安装了windows操作系统的笔记本电脑，为了提升操作系统的安全性，小张在windows系统中的“本地安全策略”中，配置了四类安全策略：账号策略、本地策略、公钥策略和IP安全策略。那么该操作属于操作系统安全配置内容中的（）", "opts": {"A": "关闭不必要的服务.", "B": "关闭不必要的端口", "C": "制定安全策略", "D": "查看日志记录"}, "a": "C", "cat": "CISO", "explanation": "常识，配置windows安全策略", "cloze": false, "blanks": 1, "fold_point": null}, {"id": 153, "q": "153.由于Internet的安全问题日益突出，基于TCP/IP协议相关组织和专家在协议的不同层次设计了相应的安全通信协议，用来保障网络各层次的安全.其中，属于或依附于传输层的安全协议是（）", "opts": {"A": "PP2P", "B": "L2TP", "C": "SSL", "D": "IPSEC"}, "a": "C", "cat": "CISO", "explanation": "", "cloze": false, "blanks": 1, "fold_point": null}, {"id": 154, "q": "154.以下关于Web传输协议、服务端和客户端软件的安全问题说法不正确的是（）", "opts": {"A": "HTTP协议主要存在明文传输数据、弱验性和缺乏状态跟踪等方面的安全问题", "B": "HTTP协议缺乏有效的安全机制，易导致拒绝服务、电子欺骗、嗅探等攻击", "C": "Cookie是为了辨别用户身份，进行会话跟踪而存储在用户本地终端上的数据，用户可以随意查看储存在Cookie中的数据，但其中的内容不能被修改", "D": "针对HTTP协议存在的安全问题，使用HTTP具有较高的安全性，可以通过证书来验证服务器的身份，并为浏览器和服务器之间的通信加密"}, "a": "C", "cat": "CISO", "explanation": "", "cloze": false, "blanks": 1, "fold_point": null}, {"id": 155, "q": "155.以下关于互联网协议安全(Internet Protocol Security，IPsec)协议说法错误的是（）", "opts": {"A": "在传送模式中，保护的是IP 负载", "B": "验证头协议(Authentication Head，AH)和IP 封装安全载荷协议(EncapsulatingSecurity Payload，ESP)都能以传输模式和隧道模式工作", "C": "在隧道模式中，保护的是整个互联网协议(Internet Protocol，IP)包，包括IP 头", "D": "IPsec 仅能保证传输数据的可认证性和保密性"}, "a": "D", "cat": "CISO", "explanation": "教材P337", "cloze": false, "blanks": 1, "fold_point": null}, {"id": 156, "q": "156.二十世纪二十年代，德国发明家亚瑟谢尔比乌斯Enigma密码机。按照密码学发展历史阶段划分，这个阶段属于（）", "opts": {"A": "古典密码阶段。这一阶段的密码专家常常靠直觉和技巧来设计密码，而不是凭借推理和证明，常用的密码运算方法包括替代方法和置换方法", "B": "近代密码发展阶段。这一阶段开始使用机械代替手工计算，形成了机械式密码设备和更进一步的机电密码设备", "C": "近代密码学的早期发展阶段。这一阶段以香农的论文“保密系统的通信理论”（The Communication Theory of Secret Systems）", "D": "现代密码学的近期发展阶段。这一阶段以公钥密码思想为标志，引发了密码学历史上的革命性的变革，同时，众多的密码算法开始应用于非机密单位和商业场合"}, "a": "D", "cat": "CISO", "explanation": "教材P269", "cloze": false, "blanks": 1, "fold_point": null}, {"id": 157, "q": "157.某个新成立的互联网金融公司拥有10个与互联网直接连接的IP地址，但是该网络内有15台个人计算机，这些个人计算机不会同时开机并连接互联网。为解决公司员工的上网问题，公司决定将这十个互联网地址集中起来使用，当任意一台个人计算机开机并连接网路时，管理中心从这10个地址中任意取出一个尚未分配的IP地址分配给这个人的计算机。他关机时，管理中心将该地址收回，并重新设置为未分配。可见，只要同时打开的个人计算机数量少于或等于可供分配的IP地址，那么，每台个人计算机可以获取一个IP地址，并实现与互联网的连接。该公司使用的IP地址规划方式是（）", "opts": {"A": "静态分配地址", "B": "动态分配地址", "C": "静态NAT分配地址", "D": "端口NAT分配地址"}, "a": "B", "cat": "CISO", "explanation": "常识，DHCP动态分配地址", "cloze": false, "blanks": 1, "fold_point": null}, {"id": 158, "q": "158.关于对信息安全事件进行分类分级管理的原因描述不正确的是（）", "opts": {"A": "信息安全事件的种类很多，严重程度也不尽相同，其响应和处理方式也应各不相同", "B": "对信息安全事件进行分类和分级管理，是有效防范和响应信息安全事件的基础", "C": "能够使事前准备、事中应对和事后处理的各项相关工作更具有针对性和有效性", "D": "我国早期的计算机安全事件的应急响应工作主要包括计算机病毒防范和“千年虫”问题的解决，关于网络安全应急响应的起步最早"}, "a": "D", "cat": "CISO", "explanation": "在教材P146，ABC选项都有，D是编的", "cloze": false, "blanks": 1, "fold_point": null}, {"id": 159, "q": "159.文本传输协议（），HTTP是互联网上广泛使用的一种网络协议，下面哪种协议纂改HTTP并结合SSL协议，具备用户鉴别和通信加密等功能（）.", "opts": {"A": "HTTP 1.1协议", "B": "HTTPS 协议", "C": "HTTPE 协议", "D": "HTTPD 协议"}, "a": "B", "cat": "CISO", "explanation": "常识", "cloze": true, "blanks": 2, "fold_point": 71}, {"id": 160, "q": "160.若一个组织声称自己的ISMS符合ISO/IBC27001或GB/T220标准要求，其信息安全控制措施通常需要在符合性方面实施常规控制，符合性常规控制这一领域不包括以下哪项控制目（）.", "opts": {"A": "符合法律要求", "B": "符合安全策略标准以及技术符合性", "C": "信息系统审核考虑", "D": "访问控制的业务要求，用户访问管理"}, "a": "D", "cat": "CISO", "explanation": "管理章节", "cloze": false, "blanks": 1, "fold_point": null}, {"id": 161, "q": "161.某贸易公司的OA系统由于存在系统漏洞，被攻击者上传了木马病毒并删除了系统中的数据，由于系统备份是每周六进行一次，事件发生时间为周三，因此导致该公司三个工作日的数据丢失并使得OA系统在随后两天内无法访问，影响到了与公司有业务往来部分公司业务，在事故处理报告中，根据GB/Z 20966-2007《信息安全事件分缓分类指南》，该事件的准确分类和定级应该是（）.", "opts": {"A": "有害程序事件 特别重大事件（I级）", "B": "信息破环事件 重大事件（II级）", "C": "有害程序事件 较大事件（III级）", "D": "信息破坏事件 一般事件 （IV级）"}, "a": "D", "cat": "CISO", "explanation": "1000万一下的损失都是一般事件", "cloze": false, "blanks": 1, "fold_point": null}, {"id": 162, "q": "162.关于信息安全管理体系（InForm ,ISMS）,下面描述错误的是（）.", "opts": {"A": "信息安全管理体系是组织在整体或特定范围内建立信息安全方针和目标，以及完成这些目标所用方法的体系， 组织架构，方针、高效、职责及相关实践要素", "B": "管理体系（）是为达到组织目标的策略、程序、指南和相关资源的框架，信息安全管理体系是管理体系和", "C": "概念上，信息安全管理体系有广义和侠义之分，侠义的信息安全管理体系是指按照ISO27001标准定义的管理体系，它是一个组织管理体系的组成部分", "D": "其的管理体系一样，信息安全管理体系也要建立信息安全管理组织机构、健全信息安全管理制度、构建信息或全技术防护体系和加强人员的安全意识等内容"}, "a": "D", "cat": "CISO", "explanation": "D是编的", "cloze": false, "blanks": 1, "fold_point": null}, {"id": 163, "q": "163.系统安全工程能力成熟度模型(SSE-CMM)错误的理解是（）。", "opts": {"A": "SSE-CMM 要求实施组织与其他组织相互作用，如开发方、产品供应商、集成商和咨询服务商等", "B": "SSE-CMM 可以使安全工程成为一个确定的、成熟的和可度量的科目", "C": "基手SSE-CMM 的工程是独立工程，与软件工程、硬件工程、通信工程等分别规划实施", "D": "SSE-CMM 覆盖整个组织的活动，包括管理、组织和工程活动等，而不仅仅是系统安全的工程活动"}, "a": "C", "cat": "CISO", "explanation": "P179", "cloze": false, "blanks": 1, "fold_point": null}, {"id": 164, "q": "164.在某次信息安全应急响应过程中，小王正在实施如下措施：消除或阻断攻击源、找到并消除系统的脆弱性/漏洞、修改安全策略、加强防范措施、格式化被感染恶意程序的介质等。请问，按照PDCERF应急响应方法，这些工作应处于以下哪个阶段（）.", "opts": {"A": "准备阶段", "B": "检测阶段", "C": "遏制阶段", "D": "根除阶段"}, "a": "D", "cat": "CISO", "explanation": "教材P153", "cloze": false, "blanks": 1, "fold_point": null}, {"id": 165, "q": "165.关于WI-FI联盟提出的安全协议WPA和WPA2的区别，下面描述正确的是（）.", "opts": {"A": "WPA是有线局域安全协议，而WPA2是无线局域网协议", "B": "WPA是适用于中国的无线局域安全协议，而WPA是适用于全世界的无线局域网协议", "C": "WPA没有使用密码算法对接入进行认证，而WPA使用了密码算法对接入进行认证", "D": "WPA是依照B02III标准草案制定的，而WPA2是依照B02 III正式标准制定的"}, "a": "D", "cat": "CISO", "explanation": "课本P341", "cloze": false, "blanks": 1, "fold_point": null}, {"id": 166, "q": "166.应急响应是信息安全事件管理的重要内容之一，关于应急响应工作，下面描述错误的是（）.", "opts": {"A": "信息安全应急响应，通常是指一个组织为了应对各种安全意外事件的发生所采取的防范措施，既包括预防性措施，也包括事件发生后的应对措施", "B": "应急响应工作有起鲜明的特点；具有高技术复杂性与专业性、强突发性、对知识经验的高依赖性，以及需要广泛的协调与合作", "C": "应急响应是组织在处置应对突发/重大信息安全事件的工作，其主要包括两部分工作；安全事件发生时正确发挥，事件发生后全面总结", "D": "应急响应工作的起源和相关机构的成立和1988年11月发生的莫里斯蠕虫病毒事件重视安全事件的应急处置和整体协调的重要性"}, "a": "C", "cat": "CISO", "explanation": "", "cloze": false, "blanks": 1, "fold_point": null}, {"id": 167, "q": "167.企业安全架构（Sherwood Applled Business Securty Architecture,SABSA）是企业架构的一个子集，它义了（），包括各层级的（）、流程和规程，以及它们与整个企业的战略、战术和运营链接的方式，用全面的、 严格的方法描述了组成完整的信息安全管理体系（ISMS）所有组件的（）。开发企业安全架构的主要原因是确保安全之外，这种类型的架构让组织更好的实现（）、集成性、易用性、标准化和便于治理性.", "opts": {"A": "信息安全战略；解决方案；结构和行为；可供参考的框架；互操作性", "B": "信息安全战略；结构和行为；解决方案；可供参考的框架；互操作性", "C": "信息安全战略；解决方案；可供参考的框架；结构和行为；互操作性", "D": "信息安全战略；可供参考的框架；解决方案；结构和行为；互操作性"}, "a": "A", "cat": "CISO", "explanation": "教材P39", "cloze": true, "blanks": 4, "fold_point": 139}, {"id": 168, "q": "168.PDCA循环又叫戴明环，是管理学常用的一种模型，关于PDCA四个字母，下面理解错误的是（）.", "opts": {"B": "P是Plan，指分析问题、发现问题、确定方针、目标和活动计划", "D": "是Do，指实施、具体运作，实现计划中的内容", "C": "是Check,指检查、总结执行计划的结果，明确效果，找出问题", "A": "是Aim，指瞄准问题，抓住安全事件的核心，确定责任"}, "a": "D", "cat": "CISO", "explanation": "四采取纠正和预防措施，持续改进：Act改进(维护和改进ISMS)", "cloze": false, "blanks": 1, "fold_point": null}, {"id": 169, "q": "169.你是单位安全主管，由于微软刚发布了数个系统漏洞补丁，安全运维人员给出了针对此漏洞修补的四个建议方案，请选择其中一个最优先方案执行（）", "opts": {"A": "由于本次发布的漏洞目前尚未出现利用工具，因此不会对系统产生实质性危害", "B": "本次发布的漏洞目前尚未出现利用工具，因此不会对系统产生实质性危害，所以可以先不做处理", "C": "对于重要的服务，应在测试环境中安装并确认补丁兼容性问题后再正式生产环境中部署", "D": "对于服务器等重要设备，立即使用系统更新功能安装这批补丁，用户终端计算机由于没有重要数据，由终端自行升级"}, "a": "C", "cat": "CISO", "explanation": "", "cloze": false, "blanks": 1, "fold_point": null}, {"id": 170, "q": "170.某单位在一次信息安全风险管理活动中，风险评估报告提出服务器A的FTP服务存在高风险漏洞，随后该单位在风险处理时选择了关闭PTP服务的处理措施，请问该措施属于哪种风险处理方式（）.", "opts": {"A": "风险降低", "B": "风险规避", "C": "风险转移", "D": "风险接受"}, "a": "B", "cat": "CISO", "explanation": "管理章节 风险规避 通常在风险的损失无法接受，又难以通过控制措施减低风险的情况下才使用规避风险这种风险处置方法 变更、延缓或停止某种服务或业务功能 该措施只能在与组织目标、法律法规符合性以及利益相关方的期望不发生冲突时考虑", "cloze": false, "blanks": 1, "fold_point": null}, {"id": 171, "q": "171.不同的信息安全风险评估方法可能得到不同的风险评估结果，所以组织机构应当根据各自的实际情况，选择适当的风险评估方法。下面的描述中，错误的是（）.", "opts": {"A": "定量风险分析试图从财务数字上对安全风险进行评估，得出可以量化的风险分析结果，以度量风险的可能性和损失量", "B": "定量风险分析相比定性风险分析能得到准确的数值，所以在实际工作中应使用定量风险分析，而不应选择定性风险分析", "C": "定性风险分析过程中，往往需要凭借分析者的经验直接进行，所以分析结果二号风险评估团队的素质、经验和知识技能密切相关", "D": "定性风险分析更具主观性，而定量风险分析更具客观性"}, "a": "B", "cat": "CISO", "explanation": "", "cloze": false, "blanks": 1, "fold_point": null}, {"id": 172, "q": "172.以下关于灾难恢复和数据备份的理解，说法正确的是（）.", "opts": {"A": "增量备份是备份从从上次完全备份后更新的全部数据文件", "B": "依据具备的灾难恢复资源程度的不同，灾难恢复能力分为7各等级", "C": "数据备份按数据类型划分可以划分为系统数据备份和用户数据备份", "D": "信息化建设没有必要涉及信息安全建设"}, "a": "C", "cat": "CISO", "explanation": "", "cloze": false, "blanks": 1, "fold_point": null}, {"id": 173, "q": "173.若一个组织声称自己的ISMS符合ISO/IEC27001或GB/T20080标准要求，其信息安全控制措施通常需要在物理环境安全方面实施常规控制，物理和环境安全领域包括安全区域和设备安全两个控制目标。安全区域的控制目标是阻止对组织场所和信息的未授权物理访问、损坏和干扰，关键或敏感的信息及信息处理设施应放在安全区域内，并受到相应保护，该目标可以通过以下控制措施来实现，不包括哪一项（）.", "opts": {"A": "物理安全边界、物理入口控制", "B": "办公室，房间和设施的安全保护，外部和环境威胁的安全防护", "C": "在安全区域工作，公共访问、交核区安全", "D": "人力资源安全"}, "a": "D", "cat": "CISO", "explanation": "", "cloze": false, "blanks": 1, "fold_point": null}, {"id": 174, "q": "174.小华在某电子商务公司工作，某天他在查看信息系统设计文档时，发现其中标准该信息系统的RPO（恢复点目标）；指标为3个小时，请问这意味着（）.", "opts": {"A": "该信息系统发生重大信息安全事件后，工作人员应在3小时内到位，完成问题定位和应急出来工作", "B": "该信息系统发生重大信息事件后，工作人员应在3小时内完成应急处理工作，共恢复对外运行", "C": "若该信息系统发生重大信息安全事件，工作人员在完成处置和灾难恢复工作后，系统至少能提供3小时的紧急数据", "D": "若该信息系统发生重大信息安全事件，工作人员在完成处置和灾难恢复工作，系统最多能丢失3小时的业务数据"}, "a": "D", "cat": "CISO", "explanation": "业务连续性 恢复点目标（RPO） 定义：灾难发生后，系统和数据必须恢复到的时间点要求 代表了当灾难发生时允许丢失的数据量", "cloze": false, "blanks": 1, "fold_point": null}, {"id": 175, "q": "175.小王在学医定量风险评估方法后，决定试着为单位机房计算火灾的风险大小。假设单位机房的总价值为400万元人民币，暴露系数（Exposure Factor,EF）是25%，年度发生率为0.2。那么小王计算的年度预期损失应该是（）.", "opts": {"A": "100万元人民币", "B": "400万元人民币", "C": "20万元人民币", "D": "180万元人民币"}, "a": "C", "cat": "CISO", "explanation": "ALE=AV*EF*ARO=400*0.25*0.2=20", "cloze": false, "blanks": 1, "fold_point": null}, {"id": 176, "q": "176.王工是某单位的系统管理员，他在某次参加单位组织的风险管理工作时，根据任务安排，他使用了Nessus工具来扫描和发现数据库服务器的漏洞。根据风险管理的相关理论，他这个扫描活动属于下面哪一个阶段的工作（）.", "opts": {"A": "风险管理", "B": "风险要素识别", "C": "风险结果判断", "D": "端口NAT分配地址"}, "a": "B", "cat": "CISO", "explanation": "使用Nessus工具来扫描和发现数据库服务器的漏洞是发现数据库的脆弱性，这是风险要素识别的工作", "cloze": false, "blanks": 1, "fold_point": null}, {"id": 177, "q": "177.小王在学习信息安全管理体系相关知识之后，对于建立信息安全管理体系，自己总结了下面四条要求，其中理解不正确的是 （ ）.", "opts": {"A": "信息安全管理体系的建立应参照国际国内有关标准实施，因为这些标准是标准化组织在总结研究了很多实际的或潜在的问题后，制定的能共同和重复使用的规则", "B": "信息安全管理体系的建立应基于最新的信息安全技术，因为这是国家有关信息安全的法律和发法规方面的要求，这体现以预防控制为主的思想", "C": "信息安全管理体系应强调全过程和动态控制的思想，因为安全问题是动态的，系统所处的安全环境也不会一成不变的，不可能建设永远安全的系统", "D": "信息安全管理体系应体现科学性和全国特点，因为要对信息安全管理涉及的方方面面实施较为均衡的管理，避免遗漏某些方面导致组织的整体信息安全水平"}, "a": "B", "cat": "CISO", "explanation": "不一定用最新的技术，用最合适的技术即可", "cloze": false, "blanks": 0, "fold_point": null}, {"id": 178, "q": "178.随着信息技术的不断发展，信息系统的重要性也越来越突出，而与此同时，发生的信息安全事件也越来 ，综合分析信息安全问题产生的根源，下面描述正确的是（）.", "opts": {"A": "信息系统自身存在脆弱性是根本原因。信息系统越来越重要，同时自身在开发、部署和使用过程中存性，导致了诸多的信息安全事件发生。因此，杜绝脆弱性的存在是解决信息安全问题的根本所在", "B": "信息系统面临诸多黑客的威胁，包括恶意攻击者和恶作剧攻击者。信息系统应用越来越广泛，接触越多，信息系统越可能遭受攻击，因此避免有恶意攻击可能的人接触信息系统就可以解决信息安全问题", "C": "信息安全问题，产生的根源要从内因和外因两个方面分析，因为信息系统自身存在脆弱性同时外部又有威胁源，从而导致信息系统可能发生安全事件，因此要防范安全风险，需从内外因同时着手", "D": "信息安全问题的根本原因是内因、外因和人三个因素的综合作用，内因和外因都可能导致安全事件的发生，但最重要的还是人的因素，外部攻击者和内部工作人员通过远程攻击，本地破坏和内外勾结等手段导致安全事件发生，因此对人这个因素的防范应是安全工作重点"}, "a": "C", "cat": "CISO", "explanation": "教材P3", "cloze": false, "blanks": 1, "fold_point": null}, {"id": 179, "q": "179.对于关键信息基础设施的理解以下哪项是正确的（）.", "opts": {"A": "关键信息基础建设是国家最为重要的设施，包括三峡大坝水利设施、神州载人航天设施和高铁网络设施", "B": "关键信息基础设施不会向公众提供服务，所以受到攻击损害后不会影响我们的日常生活", "C": "我国总体国家安全观江信息安全作为国家安全的一个重要组成部分，说明缺少信息安全我国的国家安全将无法得到保障", "D": "等级保护定级的系统属于关键信息基础设施"}, "a": "C", "cat": "CISO", "explanation": "A航空航天不是关基、但比关基重要 B关基会对公众提供服务 D等保和关基是两个体系", "cloze": false, "blanks": 1, "fold_point": null}, {"id": 180, "q": "180.为推动和规范我国信息安全等级保护工作，我国制定和发布了信息安全等级保护工作所需要的一系列标准，这些标准可以按照等级保护工作的工作阶段大致分类。下面四个标准中（）规定了等级保护定级阶段的依据、对象、流程、方法及等级变更等内容.", "opts": {"A": "GB／T20271-2006《信息系统通用安全技术要求》", "B": "GB／T 22240-2008《信息系统安全保护等级定级指南》", "C": "GB／T 25070-2010《信息系统等级保护安全设计技术要求》", "D": "GB／T20269-2006《信息系统安全管理要求》"}, "a": "B", "cat": "CISO", "explanation": "", "cloze": false, "blanks": 1, "fold_point": null}, {"id": 181, "q": "181.信息系统建设完成后，（）的信息系统的运营使用单位应当选择符合国家规定的测评机构，进行测评合格后方可投入使用。", "opts": {"A": "二级以上", "B": "三级以上", "C": "四级以上", "D": "五级以上"}, "a": "A", "cat": "CISO", "explanation": "", "cloze": false, "blanks": 1, "fold_point": null}, {"id": 182, "q": "182.根据Bell-LaPadula模型安全策略，下图中写和读操作正确的是（D）.", "opts": {"A": "可读可写", "B": "可读不可写", "C": "可写不可读", "D": "不可读不可写"}, "a": "D", "cat": "CISO", "explanation": "", "cloze": false, "blanks": 0, "fold_point": null}, {"id": 183, "q": "183.以下关于威胁建模流程步骤说法不正确的是（）", "opts": {"A": "威胁建模主要流程包括四步：确定建模对象、识别威胁、评估威胁和消减威胁", "B": "评估威胁是对威胁进行分析，评估被利用和攻击发生的概率，了解被攻击后资产的受损后果，并计算风险", "C": "消减威胁是根据威胁的评估结果，确定是否要消除该威胁以及消减的技术措施，可以通过重新设计直接消除威胁，或设计采用技术手段来消减威胁。", "D": "识别威胁是发现组件或进程存在的威胁，它可能是恶意的，威胁就是漏洞。"}, "a": "D", "cat": "CISO", "explanation": "D是编的 威胁建模四步：确定对象、识别威胁、评估威胁、消减威胁 评估威胁：对威胁进行分析，评估被利用和攻击发生的概率，了解被攻击后资产的受损后果，并计算风险。 消减威胁：根据威胁的评估结果，确定是否要消除该威胁以及消减的技术措施。在设计阶段 可以通过重新设计，以直接消除威胁，或设计采用技术手段来消减威胁在本阶段， 应在确定消减威胁手段后继续评估是否可以接受残余的安全风险。", "cloze": false, "blanks": 1, "fold_point": null}, {"id": 184, "q": "184.在设计信息系统安全保障方案时，以下哪个做法是错误的（）", "opts": {"A": "要充分符合信息安全需求并且实际可行", "B": "要充分考虑成本收益，在满足合规性要求和风险处置要求的前提下，尽量控制成本", "C": "要使用当前最新的技术和成本最高的设备，从而保障信息系统的绝对安全", "D": "要充分考虑用户管理和文化的可接受性，减少系统方案实施障碍"}, "a": "C", "cat": "CISO", "explanation": "用最合适的技术", "cloze": false, "blanks": 1, "fold_point": null}, {"id": 185, "q": "185.应急响应是信息安全事件管理的重要内容。基于应急响应工作的特点和事件的不规则性，事先创定出事件应急响应方法和过程，有助于一个组织在事件发生时阻止混乱的发生成是在混乱状态中迅速恢复控制，将损失和负面影响降到最低。应急响应方法和过程并不是唯一的。一种被广为接受的应急响应方法是将应急响应管理过程分为6个阶段，为准备→检测→遏制-，根除→恢复→跟踪总结。请问下列说法有关于信息安全应急响应管理过程错误的是 ( )", "opts": {"A": "确定重要资产和风险，实施针对风险的防护措施是信息安全应急响应规划过程中最关键的步骤", "B": "在检测阶段，首先要进行监测、报告及信息收集", "C": "遏制措施可能会因为事件的类别和级别不同而完全不同。常见的遏制措施有完全关闭所有系统、拔掉网线等", "D": "应按照应急响应计划中事先制定的业务恢复优先顺序和恢复步骤，顺次恢复相关的系统"}, "a": "A", "cat": "CISO", "explanation": "教材P152,编制管理应急响应计划才是最重要的", "cloze": false, "blanks": 0, "fold_point": null}, {"id": 186, "q": "186.有关系统安全工程-能力成熟度模型(SSE-CMM)中的通用实施(Generic Practices,GP)，错误的理解是：（）.", "opts": {"A": "GP 是涉及过程的管理、测量和制度化方面的活动", "B": "GP 适用于域维中部分过程区域(Process Areas ，PA)的活动而非所有 PA 的活动（课本 170 页内容，GP 是通用实施，适用于所有过程区域）", "C": "在工程实施时，GP 应该作为基本实施(Base，Practices，BP)的一部分加以执行", "D": "在评估时，GP 用于判定工程组织执行某个PA的能力"}, "a": "B", "cat": "CISO", "explanation": "通用实践可用于决定所有活动的能力水平。它们评判涉及过程的管理、测量和制度化能力的最基本批判标准项。 公共特征是由“通用实践”组成逻辑域归类，公共特征的设计是为描述一个组织特有的工作过程(在这种情况下指安全工程域)执行手段的重大变化。每个公共特征有一个或多个通用实践。比如最低的公共特征是l.1“执行基本惯例”。这个公共特征仅仅检查一个组织是否执行了某个过程域的“通用实践”。", "cloze": false, "blanks": 1, "fold_point": null}, {"id": 187, "q": "187.自主访问控制模型（DAC）的访问控制关系可以用访问控制表（ACL）来表示，该ACL利用在客体上附加一个主体明细表的方法来表示访问控制矩阵，通常使用由客体上附加一个主体明细表的方法来表示访问的控制矩阵，通常使用由客体指向的链表来存储相关数据。下面选项中说法正确的是（）", "opts": {"A": "ACL是Bell-LaPadule模型的一种具体实现", "B": "ACL在删除用户时，去除该用户所有的访问权限比较方便", "C": "ACL对于统计某个主体能访问哪些客体比较方便", "D": "ACL在增加客体时，增加相关的访问控制权限较为方便"}, "a": "D", "cat": "CISO", "explanation": "ACL是以客体为中心的表，一个客体一个表，增加客体当然简单", "cloze": false, "blanks": 1, "fold_point": null}, {"id": 188, "q": "188.下面对国家秘密定级和范围的描述中，哪项不符合《保守国家秘密法》要求：（）.", "opts": {"A": "国家秘密及其密级的具体范围，由国家保密工作部门分别会同外交、公安、国家安全和其他中央有关机关规定", "B": "各级国家机关、单位对所产生的国家秘密事项，应当按照国家秘密及其密级具体范围的规定确定密级", "C": "对是否属于国家机密和属于何种密级不明确的事项，可由各单位自行参考国家要求确定和定级，然后报国家保密工作部门确定", "D": "对是否属于国家秘密和属于何种密级不明确的事项。由国家保密工作部门，省、自治区、直辖市的保密工作部门。省、自治区政府所在地的市和经国务院批准的较大的市的保密工作部门或者国家保密工作部门审定的机关确定。"}, "a": "C", "cat": "CISO", "explanation": "", "cloze": false, "blanks": 1, "fold_point": null}, {"id": 189, "q": "189.在风险管理中，残余风险是指实施了新的或增强的安全措施后还剩下的风险，关于残余风险，下面描述错误的是（）.", "opts": {"A": "风险处理措施确定以后，应编制详细的残余风险清单，并获得管理层对残余风险的书面批准，这也是风险管理中的一个重要过程", "B": "管理层确认接收残余风险,是对风险评估工作的一种肯定,表示管理层已经全面了解了组织所面临的风险,并理解在风险一旦变为现实后,组织能够且必须承担引发的后果", "C": "接收残余风险,则表明没有必要防范和加固所有的安全漏洞,也没有必要无限制的提高安全保护措施的强度,对安全保护措施的选择要考虑到成本和技术等因素的限制", "D": "如果残余风险没有降低到可接受的级别,则只能被动的选择接受风险,即对风险不进行下一步的处理措施,接受风险可能带来的结果。"}, "a": "D", "cat": "CISO", "explanation": "", "cloze": false, "blanks": 1, "fold_point": null}, {"id": 190, "q": "190.某单位信息安全岗位员工，利用个人业余时间，在社交网络平台上向业内同不定期发布信息安全相关知识和前沿动态资讯，这一行为主要符合以下哪一条注册信息安全专业人员（CISP）职业道德准则：（）.", "opts": {"A": "避免任何损害CISP声誉形象的行为", "B": "自觉维护公众信息安全，拒绝并抵制通过计算机网络系统泄露个人隐私的行为", "C": "帮助和指导信息安全同行提升信息安全保障知识和能力", "D": "不在公众网络传播反动、暴力、黄色、低俗信息及非法软件"}, "a": "C", "cat": "CISO", "explanation": "", "cloze": false, "blanks": 1, "fold_point": null}, {"id": 191, "q": "191.随着信息技术的不断发展，信息系统的重要性也越来越突出。而与此同时，发生的信息安全事件也越来越多。综合分析信息安全问题产生的根源，下面播述正确的是().", "opts": {"A": "信息系统自身存在前弱性是根本原因。信息系统越来越重要，同时自身在开发、部器和使用过程中存在的脆弱性，导致了请多的信息安全事件发生，因此，杜绝脆弱性的存在是解决信息安全问题的根本所在", "B": "信息系统面临请多黑客的威胁，包括恶意攻击者和恶作剧攻击者。 信息系统应用越来越广泛，接触信息系统的人越多，信息系统越可能遭受攻击。因此，避免有恶意攻击可能的人接触信息系统就可以解决信息安全问题", "C": "信息安全问题产生的根源要从内因和外因两个方面分析，因为信息系统自身存在脆弱性，同时外部又有威胁源，从而导致信息系统可能发生安全事件，因此，要防范信息安全风险，需从内外因同时着手", "D": "信息安全问题的根本原因是内因、外因和人三个因素的综合作用，内因和外因都可能导致安全事件的发生，但最重要的还是人的因素，外部攻击者和内部工作人员通过远程攻击、本地破坏和内外勾结等手段导致安全事件发生。因此。对人这个因素的防范应是安全工作重点"}, "a": "C", "cat": "CISO", "explanation": "教材P3", "cloze": false, "blanks": 1, "fold_point": null}, {"id": 192, "q": "192.关于信息安全管理体系（ISMS）的作用，下面理解错误的是( ).", "opts": {"A": "信息安全管理体系是组织在整体或特定范围内建立信息安全方针和目标，以及完成这些目标所用方法的体系，包括组织架构、方针、活动、职责及相关实践要素", "B": "管理体系是为达到组织目标的策略、程序、指南和相关资源的框架，信息安全管理体系是管理体系思想和方法在信息安全领域的应用", "C": "概念上，信息安全管理体系有广义和狭义之分，狭义的信息安全管理体系是按照ISO27001标准定义的管理体系，它是一个组织整体管理体系的组成部分", "D": "同其他管理体系一样，信息安全管理体系也要建立信息安全管理组织机构、健全信息安全管理制度、构建信息安全技术防护体系和加强人员的安全意识等内容"}, "a": "D", "cat": "CISO", "explanation": "D是编的", "cloze": false, "blanks": 0, "fold_point": null}, {"id": 193, "q": "193.主体和客体是访问控制模型中常用的概念，下面描述错误的是（）.", "opts": {"A": "主体是访问的发起者，是一个主动的实体，可以操作被动实体的相关信息或数据", "B": "客体也是一种实体，是操作的对象，是被规定需要保护的资源", "C": "主体是动作的实施者，比如人、进程或设备等均是主体，这些对象不能被当作客体使用", "D": "一个主体为了完成任务，可以创建另外的主体，这些主体可以独立运行"}, "a": "C", "cat": "CISO", "explanation": "有的时候主题也能在其他场景成为客体，比如设备", "cloze": false, "blanks": 1, "fold_point": null}]
+(function() {
+  'use strict';
 
-// === 持久化 ===
-const LS_KEY = 'ciso_flashcard_v1';
-let state = {
-  answered: {},      // {qid: {c: 0|1, ua: 'A'}}
-  bookmarks: [],     // [qid, ...]
-  expanded: {},      // {qid: true} 展開過的題目
-  currentIdx: 0,
-  shuffled: false
-};
+  var QUESTIONS = [];
+  var mode = 'normal';
+  var order = [];
+  var currentIdx = 0;
+  var correctCount = 0;
+  var wrongCount = 0;
+  var answeredSet = new Map();
+  var LS_KEY = 'ciso_flashcard_v3';
 
-function loadState() {
-  try {
-    const saved = localStorage.getItem(LS_KEY);
-    if (saved) {
-      const parsed = JSON.parse(saved);
-      state = { ...state, ...parsed };
-    }
-  } catch(e) { console.error('loadState:', e); }
-}
-
-function saveState() {
-  try {
-    localStorage.setItem(LS_KEY, JSON.stringify(state));
-  } catch(e) { console.error('saveState:', e); }
-}
-
-// === 工具 ===
-const $ = id => document.getElementById(id);
-const CATS = [...new Set(QUESTIONS.map(q => q.cat))].sort();
-
-function populateCats() {
-  // CISO 題目無分類，filter-cat 只剩 "all" 一個 option
-  $('filter-cat').innerHTML = '<option value="all">📚 全部題目</option>';
-}
-
-function getFilteredQuestions() {
-  const cat = $('filter-cat').value;
-  const mode = $('filter-mode').value;
-  let qs = QUESTIONS.slice();
-  if (cat !== 'all') qs = qs.filter(q => q.cat === cat);
-  if (mode === 'wrong') qs = qs.filter(q => state.answered[q.id] && state.answered[q.id].c === 0);
-  else if (mode === 'bookmark') qs = qs.filter(q => state.bookmarks.includes(q.id));
-  else if (mode === 'unanswered') qs = qs.filter(q => !state.answered[q.id]);
-
-  else if (mode === 'cloze') qs = qs.filter(q => q.cloze);
-  if (state.shuffled) qs = qs.sort(() => Math.random() - 0.5);
-  return qs;
-}
-
-function updateStats() {
-  const correct = Object.values(state.answered).filter(a => a.c === 1).length;
-  const wrong = Object.values(state.answered).filter(a => a.c === 0).length;
-  $('stat-correct').textContent = correct;
-  $('stat-wrong').textContent = wrong;
-  $('stat-bookmark').textContent = state.bookmarks.length;
-  const answered = Object.keys(state.answered).length;
-  $('stat-remaining').textContent = QUESTIONS.length - answered;
-}
-
-function showToast(msg) {
-  const t = $('toast');
-  t.textContent = msg;
-  t.classList.add('show');
-  setTimeout(() => t.classList.remove('show'), 1800);
-}
-
-function render() {
-  const qs = getFilteredQuestions();
-  updateStats();
-  const progress = (Object.keys(state.answered).length / QUESTIONS.length) * 100;
-  $('progress').style.width = `${progress}%`;
-  
-  const content = $('content');
-  if (qs.length === 0) {
-    content.innerHTML = '<div class="empty-state">📭 呢個分類冇題目</div>';
-    return;
+  // ─── LocalStorage ───────────────────────────────────────────────
+  function loadProgress() {
+    try {
+      var raw = localStorage.getItem(LS_KEY);
+      return raw ? JSON.parse(raw) : null;
+    } catch (e) { return null; }
   }
-  
-  if (state.currentIdx >= qs.length) state.currentIdx = 0;
-  const q = qs[state.currentIdx];
-  const isBookmarked = state.bookmarks.includes(q.id);
-  const ans = state.answered[q.id];
-  
-  let optsHtml = '';
-  ['A','B','C','D'].forEach(k => {
-    let cls = 'opt';
-    if (ans) {
-      cls += ' disabled';
-      if (k === q.a) cls += ' correct';
-      else if (k === ans.ua) cls += ' wrong';
-    }
-    optsHtml += `
-      <div class="${cls}" data-key="${k}">
-        <div class="opt-key">${k}</div>
-        <div>${renderMd(q.opts[k])}</div>
-      </div>
-    `;
-  });
-  
-  let fbHtml = '';
-  if (ans) {
-    const correct = ans.c === 1;
-    fbHtml = `<div class="feedback show ${correct ? 'right' : 'wrong'}">
-      ${correct ? '✅ 答啱！' : `❌ 答錯，你揀咗 ${ans.ua}，正確答案係 <b>${q.a}</b>`}
-    </div>`;
-  }
-  
-  // 摺疊挖空題 (cloze = 題幹≥2 個 （）)
-  const isCloze = q.cloze && q.fold_point && q.fold_point < q.q.length - 5;
-  const qTextHtml = isCloze && !state.expanded[q.id]
-    ? `<div class="q-fade"><div class="q-text">${renderMd(q.q.slice(0, q.fold_point))}</div></div>
-       <button class="q-toggle" id="q-toggle">▼ 展開題目 (${q.q.length - q.fold_point} 字)</button>`
-    : `<div class="q-text">${renderMd(q.q)}</div>${isCloze ? `<button class="q-toggle" id="q-toggle">▲ 摺疊題目</button>` : ''}`;
 
-  content.innerHTML = `
-    <div class="question-card">
-      <div class="q-header">
-        <span class="q-id">題 ${q.id} · ${state.currentIdx + 1}/${qs.length}</span>
-        <span class="q-cat">${q.cat}${q.cloze ? ` · ${q.blanks} 個空白` : ''}</span>
-        <div class="q-actions">
-          <button id="bookmark-btn" class="${isBookmarked ? 'q-bookmarked' : ''}" title="書籤 (B)">
-            ${isBookmarked ? '⭐' : '☆'}
-          </button>
-        </div>
-      </div>
-      ${qTextHtml}
-      <div class="options">${optsHtml}</div>
-      ${fbHtml}
-      <div class="nav">
-        <button id="prev">◀ 上一題 (←)</button>
-        <button id="reveal" class="primary" style="flex: 2">${ans ? '下一題 (Space)' : '顯示答案 (R)'}</button>
-        <button id="next">下一題 (→)</button>
-      </div>
-    </div>
-  `;
-  
-  // 綁事件
-  const tgl = $('q-toggle');
-  if (tgl) tgl.onclick = () => {
-    state.expanded[q.id] = !state.expanded[q.id];
-    saveState();
-    render();
-  };
-  $('bookmark-btn').onclick = toggleBookmark;
-  $('prev').onclick = () => { if (state.currentIdx > 0) state.currentIdx--; render(); saveState(); };
-  $('next').onclick = () => { if (state.currentIdx < qs.length - 1) state.currentIdx++; render(); saveState(); };
-  $('reveal').onclick = nextOrReveal;
-  
-  document.querySelectorAll('.opt').forEach(el => {
-    el.onclick = () => {
-      if (ans) return;
-      const k = el.dataset.key;
-      const correct = k === q.a ? 1 : 0;
-      state.answered[q.id] = { c: correct, ua: k };
-      saveState();
-      render();
-    };
-  });
-}
-
-function nextOrReveal() {
-  const qs = getFilteredQuestions();
-  const q = qs[state.currentIdx];
-  if (!state.answered[q.id]) {
-    state.answered[q.id] = { c: 0, ua: null };
-    saveState();
-    render();
-  } else {
-    if (state.currentIdx < qs.length - 1) state.currentIdx++;
-    saveState();
-    render();
-  }
-}
-
-function toggleBookmark() {
-  const qs = getFilteredQuestions();
-  const q = qs[state.currentIdx];
-  const idx = state.bookmarks.indexOf(q.id);
-  if (idx >= 0) {
-    state.bookmarks.splice(idx, 1);
-    showToast('書籤已移除');
-  } else {
-    state.bookmarks.push(q.id);
-    showToast('⭐ 已加入書籤');
-  }
-  saveState();
-  render();
-}
-
-function escapeHtml(s) {
-  return String(s).replace(/[&<>"']/g, c => ({
-    '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'
-  })[c]);
-}
-
-// 將 markdown 圖片語法 ![](./pic/N.png) 轉成 <img>
-// 圖片 hotlink 自 https://raw.githubusercontent.com/npcola/CISP/main/pic/
-const PIC_BASE = 'https://raw.githubusercontent.com/npcola/CISP/main/pic/';
-function renderMd(s) {
-  const esc = escapeHtml(s);
-  return esc.replace(/!\[\]\(\.\/pic\/([^\s)]+)\)/g, (_, fname) =>
-    `<img class="q-img" src="${PIC_BASE}${fname}" alt="${fname}" loading="lazy" onerror="this.style.display='none'">`
-  );
-}
-
-// === Import / Export ===
-function exportProgress() {
-  const blob = new Blob([JSON.stringify(state, null, 2)], { type: 'application/json' });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = `cisp-flashcard-${new Date().toISOString().slice(0,10)}.json`;
-  a.click();
-  URL.revokeObjectURL(url);
-  showToast('💾 進度已匯出');
-}
-
-function importProgress() {
-  const input = document.createElement('input');
-  input.type = 'file';
-  input.accept = '.json';
-  input.onchange = e => {
-    const f = e.target.files[0];
-    if (!f) return;
-    const r = new FileReader();
-    r.onload = ev => {
-      try {
-        const imported = JSON.parse(ev.target.result);
-        if (confirm('匯入會覆蓋當前進度，確定？')) {
-          state = { ...state, ...imported };
-          saveState();
-          render();
-          showToast('📂 進度已匯入');
-        }
-      } catch(err) {
-        alert('匯入失敗: ' + err.message);
+  function saveProgress() {
+    var data = { answers: {}, lastQuestionId: null };
+    var q = QUESTIONS[order[currentIdx]];
+    if (q) data.lastQuestionId = q.id;
+    answeredSet.forEach(function(wasCorrect, id) {
+      var entry = wasCorrect ? 1 : 0;
+      // Persist userAnswer so wrong highlighting survives reload
+      var qref = null;
+      for (var i = 0; i < QUESTIONS.length; i++) {
+        if (QUESTIONS[i].id === id) { qref = QUESTIONS[i]; break; }
       }
-    };
-    r.readAsText(f);
-  };
-  input.click();
-}
-
-function resetAll() {
-  if (!confirm('確定重置所有答題記錄同書籤？此操作無法撤銷。')) return;
-  state = { answered: {}, bookmarks: [], currentIdx: 0, shuffled: false };
-  saveState();
-  render();
-  showToast('🔄 已重置');
-}
-
-// === 鍵盤 ===
-document.addEventListener('keydown', e => {
-  if (e.target.tagName === 'SELECT' || e.target.tagName === 'INPUT') return;
-  const k = e.key.toLowerCase();
-  if (['1','2','3','4'].includes(e.key)) {
-    const opt = document.querySelector(`.opt[data-key="${e.key}"]`);
-    if (opt && !opt.classList.contains('disabled')) opt.click();
-  } else if (k === ' ') {
-    e.preventDefault();
-    nextOrReveal();
-  } else if (k === 'b') {
-    toggleBookmark();
-  } else if (k === 'r') {
-    nextOrReveal();
-  } else if (k === 'e') {
-    // 展開/摺疊當前題目
-    const qs2 = getFilteredQuestions();
-    const q2 = qs2[state.currentIdx];
-    if (q2) {
-      state.expanded[q2.id] = !state.expanded[q2.id];
-      saveState();
-      render();
-    }
-  } else if (k === 'arrowleft') {
-    if (state.currentIdx > 0) { state.currentIdx--; render(); saveState(); }
-  } else if (k === 'arrowright') {
-    const qs = getFilteredQuestions();
-    if (state.currentIdx < qs.length - 1) { state.currentIdx++; render(); saveState(); }
+      if (qref && qref.userAnswer) entry = { c: wasCorrect ? 1 : 0, ua: qref.userAnswer };
+      data.answers[id] = entry;
+    });
+    console.log('[CISO] saveProgress →', JSON.stringify(data));
+    try { localStorage.setItem(LS_KEY, JSON.stringify(data)); } catch (e) { console.error('[CISO] localStorage setItem failed:', e); }
   }
-});
 
-// === Init ===
-loadState();
-populateCats();
-$('filter-cat').onchange = () => { state.currentIdx = 0; render(); };
-$('filter-mode').onchange = () => { state.currentIdx = 0; render(); };
-$('shuffle').onclick = () => { state.shuffled = !state.shuffled; state.currentIdx = 0; render(); showToast(state.shuffled ? '🔀 已洗牌' : '➡️ 恢復順序'); };
-$('export').onclick = exportProgress;
-$('import').onclick = importProgress;
-$('reset').onclick = resetAll;
-render();
+  function resetProgress() {
+    if (!confirm('确定清除所有答题记录？')) return;
+    try { localStorage.removeItem(LS_KEY); } catch (e) {}
+    correctCount = wrongCount = 0;
+    answeredSet = new Map();
+    updateStats();
+    setMode('normal');
+  }
+
+  // ─── Init ────────────────────────────────────────────────────────
+  function init() {
+    correctCount = wrongCount = 0;
+    answeredSet = new Map();
+    updateStats();
+    setMode('normal');
+  }
+
+  function restoreAnswers() {
+    var saved = loadProgress();
+    if (!saved || !saved.answers) return;
+    Object.keys(saved.answers).forEach(function(id) {
+      var val = saved.answers[id];
+      var numId = parseInt(id, 10);
+      // Support both old format (number) and new format ({c, ua})
+      var wasCorrect, ua = null;
+      if (typeof val === 'object' && val !== null) {
+        wasCorrect = val.c === 1;
+        ua = val.ua || null;
+      } else {
+        wasCorrect = val === 1;
+      }
+      if (wasCorrect) correctCount++;
+      else wrongCount++;
+      answeredSet.set(numId, wasCorrect);
+      if (ua) {
+        for (var i = 0; i < QUESTIONS.length; i++) {
+          if (QUESTIONS[i].id === numId) { QUESTIONS[i].userAnswer = ua; break; }
+        }
+      }
+    });
+    updateStats();
+  }
+
+  // ─── Mode ───────────────────────────────────────────────────────
+  function setMode(m) {
+    mode = m;
+    var tabs = document.querySelectorAll('.tab');
+    for (var i = 0; i < tabs.length; i++) {
+      tabs[i].classList.toggle('active', tabs[i].getAttribute('data-mode') === m);
+    }
+    if (m === 'shuffle') {
+      order = shuffleArray([].concat(Array.apply(null, {length: QUESTIONS.length}).map(Number.call, Number)));
+    } else if (m === 'review-wrong') {
+      var wrongIdxs = [];
+      for (var j = 0; j < QUESTIONS.length; j++) {
+        if (answeredSet.has(QUESTIONS[j].id) && !answeredSet.get(QUESTIONS[j].id)) {
+          wrongIdxs.push(j);
+        }
+      }
+      if (wrongIdxs.length === 0) {
+        document.getElementById('card-area').innerHTML = '<div class="card" style="text-align:center;color:var(--muted);padding:40px">没有错题需要复习</div>';
+        return;
+      }
+      order = shuffleArray(wrongIdxs);
+    } else {
+      order = [].concat(Array.apply(null, {length: QUESTIONS.length}).map(Number.call, Number));
+    }
+    currentIdx = 0;
+    renderCard();
+  }
+
+  function shuffleArray(arr) {
+    var a = arr.slice();
+    for (var i = a.length - 1; i > 0; i--) {
+      var j = Math.floor(Math.random() * (i + 1));
+      var tmp = a[i]; a[i] = a[j]; a[j] = tmp;
+    }
+    return a;
+  }
+
+  // ─── Sanitize stem: inject onerror fallback for broken image refs ───
+  function sanitizeStem(s) {
+    if (!s) return '';
+    return String(s).replace(/<img\b([^>]*?)>/gi, function(m, attrs) {
+      if (/\sonerror\s*=/i.test(attrs)) return m;  // already has onerror
+      return '<img' + attrs + ' onerror="this.classList.add(\'img-broken\'); this.alt=\'图片缺失\'; this.removeAttribute(\'src\');">';
+    });
+  }
+
+  // ─── Render ─────────────────────────────────────────────────────
+  function renderCard() {
+    if (order.length === 0) { showResults(); return; }
+
+    var q = QUESTIONS[order[currentIdx]];
+    if (!q) { console.error('No question at index', currentIdx, order[currentIdx]); return; }
+
+    var hasOpts = q.options && q.options.length > 0;
+    var wasAnswered = answeredSet.has(q.id);
+
+    var optsHtml = '';
+    if (hasOpts) {
+      for (var i = 0; i < q.options.length; i++) {
+        var o = q.options[i];
+        var cls = 'option';
+        if (wasAnswered) {
+          if (o.label === q.answer) cls += ' correct';
+          else if (answeredSet.get(q.id) === false && o.label === q.userAnswer) cls += ' wrong';
+        }
+        optsHtml += '<div class="' + cls + '" onclick="selectOptionByIndex(' + i + ')">' +
+          '<span class="opt-label">' + o.label + '</span>' +
+          '<span>' + o.text + '</span></div>';
+      }
+    }
+
+    var showCheckBtn = (!hasOpts || wasAnswered);
+    var explanationDisplay = wasAnswered ? 'block' : 'none';
+
+    var html = '<div class="card"><span class="card-id">#' + q.id + '</span>' +
+      '<div class="stem">' + sanitizeStem(q.stem) + '</div>' +
+      (hasOpts ? optsHtml : '<div style="color:var(--muted);font-size:0.88rem;margin-bottom:12px">（无选项，直接显示答案）</div>') +
+      '<button class="check-btn' + (showCheckBtn ? ' show' : '') + '" id="check-btn" onclick="revealAnswer()">查看答案 & 解析</button>' +
+      '</div>' +
+      '<div class="explanation" id="explanation" style="display:' + explanationDisplay + '">' +
+      '<strong>答案: ' + (q.answer || '?') + '</strong>' + (q.explanation ? q.explanation : '（无解析）') +
+      '</div>' +
+      '<div class="actions">' +
+      '<button class="btn btn-ghost" onclick="prevCard()"' + (currentIdx === 0 ? ' disabled style="opacity:0.3"' : '') + '>上一题</button>' +
+      '<button class="btn btn-primary" onclick="nextCard()">' + (currentIdx >= order.length - 1 ? '查看结果' : '下一题') + '</button>' +
+      (hasOpts && !wasAnswered ? '<button class="btn btn-primary" onclick="revealAnswer()">显示答案</button>' : '') +
+      '</div>';
+
+    document.getElementById('card-area').innerHTML = html;
+    document.getElementById('progress-fill').style.width = ((currentIdx + 1) / order.length * 100) + '%';
+    document.getElementById('progress-text').textContent = (currentIdx + 1) + '/' + order.length;
+  }
+
+  // ─── Select Option (by index - more reliable than string matching) ────
+  window.selectOptionByIndex = function(idx) {
+    var q = QUESTIONS[order[currentIdx]];
+    if (!q) { console.error('selectOptionByIndex: no question'); return; }
+    if (!q.options || idx < 0 || idx >= q.options.length) { console.error('selectOptionByIndex: bad idx', idx); return; }
+    if (answeredSet.has(q.id)) return; // already answered
+
+    // Use original option order (no shuffle)
+    var displayOpts = q.options;
+    var selectedOption = displayOpts[idx];
+    var label = selectedOption.label;
+    var isCorrect = label === q.answer;
+
+    answeredSet.set(q.id, isCorrect);
+    q.userAnswer = label; // track what user picked
+
+    if (isCorrect) correctCount++;
+    else wrongCount++;
+
+    updateStats();
+    saveProgress();
+
+    // Style all option buttons
+    var opts = document.querySelectorAll('.option');
+    for (var i = 0; i < opts.length; i++) {
+      opts[i].classList.add('disabled');
+      opts[i].style.pointerEvents = 'none';
+    }
+
+    // Mark selected option
+    if (isCorrect) {
+      opts[idx].classList.add('correct');
+    } else {
+      opts[idx].classList.add('wrong');
+      // Show correct answer in original option order
+      for (var j = 0; j < displayOpts.length; j++) {
+        if (displayOpts[j].label === q.answer) {
+          opts[j].classList.add('correct');
+          break;
+        }
+      }
+    }
+
+    // Show explanation
+    var expl = document.getElementById('explanation');
+    if (expl) expl.style.display = 'block';
+    var btn = document.getElementById('check-btn');
+    if (btn) btn.style.display = 'none';
+  };
+
+  // ─── Reveal Answer (no options) ─────────────────────────────────
+  window.revealAnswer = function() {
+    var q = QUESTIONS[order[currentIdx]];
+    if (!q) return;
+    if (!answeredSet.has(q.id)) {
+      answeredSet.set(q.id, false);
+      wrongCount++;
+      updateStats();
+      saveProgress();
+    }
+    var displayOpts = q.options;
+    var opts = document.querySelectorAll('.option');
+    for (var i = 0; i < opts.length; i++) {
+      opts[i].classList.add('disabled');
+      opts[i].style.pointerEvents = 'none';
+      // Highlight correct
+      if (displayOpts[i] && displayOpts[i].label === q.answer) {
+        opts[i].classList.add('correct');
+      }
+    }
+    var expl = document.getElementById('explanation');
+    if (expl) expl.style.display = 'block';
+    var btn = document.getElementById('check-btn');
+    if (btn) btn.style.display = 'none';
+  };
+
+  // ─── Navigation ─────────────────────────────────────────────────
+  window.nextCard = function() {
+    currentIdx++;
+    if (currentIdx >= order.length) { showResults(); return; }
+    renderCard();
+  };
+
+  window.prevCard = function() {
+    if (currentIdx > 0) { currentIdx--; renderCard(); }
+  };
+
+  window.jumpTo = function() {
+    var n = parseInt(document.getElementById('jump-input').value, 10);
+    if (!n || n < 1 || n > QUESTIONS.length) return;
+    var target = n - 1;
+    var pos = order.indexOf(target);
+    if (pos !== -1) { currentIdx = pos; renderCard(); }
+    else { currentIdx = target; order = [].concat(Array.apply(null, {length: QUESTIONS.length}).map(Number.call, Number)); renderCard(); }
+  };
+
+  window.setMode = setMode;
+  window.resetProgress = resetProgress;
+
+  // ─── Stats ───────────────────────────────────────────────────────
+  function updateStats() {
+    document.getElementById('correct-count').textContent = correctCount;
+    document.getElementById('wrong-count').textContent = wrongCount;
+  }
+
+  // ─── Results ─────────────────────────────────────────────────────
+  function showResults() {
+    var total = correctCount + wrongCount;
+    var pct = total > 0 ? Math.round(correctCount / total * 100) : 0;
+    var emoji = pct >= 80 ? '🎉' : pct >= 60 ? '💪' : '📚';
+    document.getElementById('card-area').innerHTML =
+      '<div class="results"><h2>' + emoji + ' 阶段完成</h2>' +
+      '<div class="big-score">' + pct + '%</div>' +
+      '<div class="sub">正确 ' + correctCount + ' / 错误 ' + wrongCount + ' / 总计 ' + total + '</div>' +
+      '<div class="results-grid">' +
+      '<div class="results-box"><div class="num" style="color:var(--correct)">' + correctCount + '</div><div class="lbl">正确</div></div>' +
+      '<div class="results-box"><div class="num" style="color:var(--wrong)">' + wrongCount + '</div><div class="lbl">错误</div></div>' +
+      '</div>' +
+      '<div class="actions" style="justify-content:center">' +
+      '<button class="btn btn-primary" onclick="init()">重新开始</button>' +
+      '<button class="btn btn-ghost" onclick="setMode(\'review-wrong\')">复习错题</button>' +
+      '</div></div>';
+    document.getElementById('progress-fill').style.width = '100%';
+  }
+
+  // ─── Keyboard shortcuts ──────────────────────────────────────────
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'ArrowRight' || e.key === 'Enter') { nextCard(); return; }
+    if (e.key === 'ArrowLeft') { prevCard(); return; }
+    var q = QUESTIONS[order[currentIdx]];
+    if (!q) return;
+    var displayOpts = q.options;
+    if (!displayOpts) return;
+    var keyMap = { 'a': 0, 'b': 1, 'c': 2, 'd': 3, 'A': 0, 'B': 1, 'C': 2, 'D': 3 };
+    var idx = keyMap[e.key];
+    if (idx !== undefined && !answeredSet.has(q.id) && idx < displayOpts.length) {
+      selectOptionByIndex(idx);
+    }
+  });
+
+  // ─── Load data ────────────────────────────────────────────────────
+  var xhr = new XMLHttpRequest();
+  xhr.open('GET', 'data.json', true);
+  xhr.onload = function() {
+    try {
+      var data = JSON.parse(xhr.responseText);
+      QUESTIONS = data;
+      console.log('[CISO] data.json loaded, questions:', data.length);
+      console.log('[CISO] calling init...');
+      init();
+      console.log('[CISO] init done. answeredSet size:', answeredSet.size);
+      console.log('[CISO] calling restoreAnswers...');
+      restoreAnswers();
+      console.log('[CISO] restoreAnswers done. answeredSet size:', answeredSet.size, 'correct:', correctCount, 'wrong:', wrongCount);
+    } catch (e) {
+      console.error('[CISO] parse error:', e);
+      document.getElementById('card-area').innerHTML = '<div class="card" style="text-align:center;color:var(--wrong);padding:40px">加载题目失败，请刷新重试</div>';
+    }
+  };
+  xhr.onerror = function() {
+    console.error('Failed to load data.json');
+    document.getElementById('card-area').innerHTML = '<div class="card" style="text-align:center;color:var(--wrong);padding:40px">加载题目失败，请检查网络后刷新</div>';
+  };
+  xhr.send();
+
+})();
 </script>
 </body>
 </html>
