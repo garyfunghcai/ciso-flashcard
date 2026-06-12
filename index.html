@@ -428,7 +428,7 @@ function render() {
   }
   
   // 摺疊挖空題 (cloze = 題幹≥2 個 （）)
-  const isCloze = q.cloze && q.fold_point && q.fold_point < q.q.length - 30;
+  const isCloze = q.cloze && q.fold_point && q.fold_point < q.q.length - 5;
   const qTextHtml = isCloze && !state.expanded[q.id]
     ? `<div class="q-fade"><div class="q-text">${renderMd(q.q.slice(0, q.fold_point))}</div></div>
        <button class="q-toggle" id="q-toggle">▼ 展開題目 (${q.q.length - q.fold_point} 字)</button>`
